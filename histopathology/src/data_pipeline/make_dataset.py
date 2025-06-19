@@ -9,7 +9,7 @@ from patchify import patchify, unpatchify
 from PIL import Image
 
 
-def generate_patches(slidepath, patch_path, patch_size=512):
+def generate_patches(slidepath, patch_path, patch_size=128):
     slidepath, slidename = os.path.split(slidepath)
     slide_path = os.path.join(slidepath, slidename)
     # print(slide_path)

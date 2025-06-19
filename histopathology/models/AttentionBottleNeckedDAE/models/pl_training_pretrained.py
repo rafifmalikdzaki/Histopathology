@@ -17,21 +17,18 @@ class MyModel(pl.LightningModule):
         return encoded, decoded, z
 
     def training_step(self, batch, batch_idx):
-        x, _ = batch
+        x = batch
         encoded, decoded, z = self.forward(x)
 
         # MSE loss between input and reconstruction
         mse_loss = nn.MSELoss()(x, decoded)
-        # KL divergence loss
-        kl_div = -0.5 * torch.sum(1 + encoded - encoded.pow(2) - torch.exp(encoded))
 
         # Total loss
-        loss = mse_loss + kl_div
+        loss = mse_loss
 
         # Logging losses
         self.log('train_loss', loss, on_epoch=True)
         self.log('train_mse_loss', mse_loss, on_epoch=True)
-        self.log('train_kl_div', kl_div, on_epoch=True)
 
         return loss
 
@@ -41,29 +38,20 @@ class MyModel(pl.LightningModule):
 
         # MSE loss between input and reconstruction
         mse_loss = nn.MSELoss()(x, decoded)
-        # KL divergence loss
-        kl_div = -0.5 * torch.sum(1 + encoded - encoded.pow(2) - torch.exp(encoded))
 
         # Total loss
-        loss = mse_loss + kl_div
+        loss = mse_loss
 
         # Logging losses
         self.log('val_loss', loss, on_epoch=True)
         self.log('val_mse_loss', mse_loss, on_epoch=True)
-        self.log('val_kl_div', kl_div, on_epoch=True)
 
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=0.01)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.2, patience=5,
-                                                               min_lr=1e-6)
+        optimizer = torch.optim.Adam(self.parameters(), lr=0.0015)
         return {
             'optimizer': optimizer,
-            'lr_scheduler': {
-                'scheduler': scheduler,
-                'monitor': 'val_loss'
-            }
         }
 
 
@@ -106,11 +94,11 @@ class ImageDataset(Dataset):
 
 
 # Define the image directory
-image_dir = './data/processed/PANnuke/'
+image_dir = './data/processed/HeparUnifiedPNG/'
 
 # Create the dataset
 dataset = ImageDataset(image_dir=image_dir)
-dataloader = DataLoader(dataset, batch_size=8, shuffle=True)
+dataloader = DataLoader(dataset, batch_size=12, shuffle=True)
 
 model = MyModel()
 
@@ -120,15 +108,14 @@ wandb_logger = WandbLogger(project='histo-dae')
 wandb_logger.watch(model, log='all', log_freq=10)
 
 # Set up callbacks
-early_stop_callback = EarlyStopping(monitor='val_loss', patience=10, verbose=True, mode='min')
 lr_monitor = LearningRateMonitor(logging_interval='epoch')
-checkpoint_callback = ModelCheckpoint(monitor='val_loss')
+checkpoint_callback = ModelCheckpoint(monitor='train_loss')
 
 # Initialize the trainer
 trainer = pl.Trainer(
-    max_epochs=10,
+    max_epochs=5,
     logger=wandb_logger,
-    callbacks=[early_stop_callback, lr_monitor, checkpoint_callback]
+    callbacks=[lr_monitor, checkpoint_callback]
 )
 
 # # Train the model

@@ -8,9 +8,10 @@ import cv2
 
 def create_dataset(subset: str, image_path: str = None):
     if image_path is None:
-        image_path = f"../../../data/processed/{subset}.csv"
-    df = pd.read_csv(image_path)
-    X = df['Image'].apply(lambda x: "../../../data/processed/HeparUnifiedPNG/" + x).astype(str).to_list()
+        image_path = f"./data/processed/"
+    print(image_path + subset + ".csv")
+    df = pd.read_csv(image_path + subset + ".csv")
+    X = df['Image'].apply(lambda x: image_path + "/HeparUnifiedPNG/" + x).astype(str).to_list()
     y = torch.from_numpy(df.iloc[:, -1].to_numpy())
     return X, y
 

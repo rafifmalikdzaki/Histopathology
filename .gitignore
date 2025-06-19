@@ -155,6 +155,155 @@ cython_debug/
 # data
 data/
 
+# =============================================================================
+# IMAGES AND LARGE FILES FOR HISTOPATHOLOGY RESEARCH
+# =============================================================================
+
+# Common image formats
+*.jpg
+*.jpeg
+*.png
+*.tiff
+*.tif
+*.bmp
+*.gif
+*.svg
+*.webp
+*.ico
+*.raw
+*.cr2
+*.nef
+*.orf
+*.sr2
+
+# Medical and microscopy imaging formats
+*.dcm
+*.dicom
+*.nii
+*.nii.gz
+*.mha
+*.mhd
+*.nrrd
+*.vtk
+*.vti
+
+# Whole slide imaging formats (histopathology specific)
+*.ndpi
+*.svs
+*.scn
+*.vms
+*.vmu
+*.mrxs
+*.czi
+*.lsm
+*.oib
+*.oif
+*.lei
+*.zvi
+*.lif
+*.qptiff
+*.bif
+
+# Large data files
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.joblib
+*.npy
+*.npz
+*.mat
+*.parquet
+*.feather
+*.csv
+*.tsv
+*.xlsx
+*.xls
+
+# Model files and checkpoints
+*.pth
+*.pt
+*.ckpt
+*.pb
+*.onnx
+*.tflite
+*.keras
+*.model
+*.bin
+*.safetensors
+*.weights
+
+# Video and audio files
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mkv
+*.m4v
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.wma
+
+# Dataset and sample directories
+datasets/
+images/
+samples/
+raw_data/
+processed_data/
+annotations/
+labels/
+masks/
+patches/
+tiles/
+slides/
+wsi/
+
+# Results and output directories
+results/
+outputs/
+experiments/
+checkpoints/
+models/
+weights/
+
+# Compressed archives (often large)
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.rar
+*.7z
+*.gz
+*.bz2
+
+# Temporary and backup files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*.out
+*.output
+
+# OS and IDE files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore

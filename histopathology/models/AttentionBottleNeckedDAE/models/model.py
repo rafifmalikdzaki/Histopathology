@@ -150,7 +150,7 @@ class Autoencoder_Decoder(nn.Module):
 
 class Autoencoder_BottleNeck(nn.Module):
 
-    def __init__(self):
+    def __init__(self): 
         super(Autoencoder_BottleNeck, self).__init__()
 
         self.encoder1 = nn.Sequential(
@@ -168,6 +168,8 @@ class Autoencoder_BottleNeck(nn.Module):
         )
 
         self.attn2 = BAM(16)
+
+        # The VAE Code
 
         self.decoder = nn.Sequential(
            nn.ConvTranspose2d(16, 128, kernel_size=3, padding=1, stride=2, output_padding=1),
@@ -227,7 +229,7 @@ if __name__ == '__main__':
     x, y, z = complete(x_e)
 
     summary(complete, x_e)
-    print(z.shape)
+    print(x.shape)
     # flat = nn.Flatten().to('cuda')
     # flatten = flat(z)
     #print(flatten.shape)

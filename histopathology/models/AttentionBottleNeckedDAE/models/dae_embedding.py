@@ -1,38 +1,56 @@
-import torch.nn as nn
+import torch
+import torch.utils.data
+import pandas as pd
+import numpy as np
 from model import DAE_KAN_Attention
-from histopathology_dataset import *
+from histopathology_dataset import create_dataset, ImageDataset
+from tqdm import tqdm
 
-class IntermediateModel(nn.Module):
-    def __init__(self, original_model):
-        super(IntermediateModel, self).__init__()
-        self.encoder1 = original_model.encoder1
-        self.encoder2 = original_model.encoder2
-        self.encoder3 = original_model.encoder3
-        self.bottleneck_encoder1 = original_model.bottleneck_encoder1
-        self.attn1 = original_model.attn1
-        self.bottleneck_encoder2 = original_model.bottleneck_encoder2
-        self.attn2 = original_model.attn2
+def get_dae_embedding(model, checkpoint, dataloader, device='cuda'):
+    # Load checkpoint and update state dict
+    new_state_dict = {}
+    for key, value in checkpoint['state_dict'].items():
+        new_key = key.replace("model.", "")
+        new_state_dict[new_key] = value
+    model.load_state_dict(new_state_dict)
+    model.eval()
 
-    def forward(self, x):
-        x = self.encoder1(x)
-        x = self.encoder2(x)
-        x = self.encoder3(x)
-        x = self.bottleneck_encoder1(x)
-        x = self.attn1(x)
-        x = self.bottleneck_encoder2(x)
-        x = self.attn2(x)
-        return x
+    embeddings = []
+    labels = []
 
-if __name__ == '__main__':
-    # Instantiate the intermediate model with the loaded model
-    model = DAE_KAN_Attention()
-    checkpoint = torch.load("../histo-dae/go2j1m2y/checkpoints/epoch=3-step=9528.ckpt")
+    with torch.no_grad():
+        for data, label in tqdm(dataloader):
+            data = data.to(device)
+            _, _, z = model(data)
+            z = z.view(z.size(0), -1)
+            embeddings.append(z.cpu().numpy())
+            labels.append(label.cpu().numpy())
 
-    intermediate_model = IntermediateModel(model)
+    embeddings = np.concatenate(embeddings, axis=0)
+    labels = np.concatenate(labels, axis=0)
 
-    # Example input
-    input_data = torch.randn(1, 3, 224, 224)
+    return embeddings, labels
 
-    # Get the output up to attn2
-    output_data = intermediate_model(input_data)
-    print(output_data.shape)
+# Path to the checkpoint
+checkpoint_path = "./histo-dae/Finetuned/checkpoints/epoch=29-step=24415.ckpt"
+checkpoint = torch.load(checkpoint_path)
+
+# Create dataset and dataloader
+data = create_dataset('OHEheparfix')
+train_ds = ImageDataset(*data, 'cuda')
+dataloader = torch.utils.data.DataLoader(train_ds, batch_size=192)
+
+# Instantiate the original model
+original_model = DAE_KAN_Attention().to('cuda')
+
+# Get the embeddings and labels
+embeddings, labels = get_dae_embedding(original_model, checkpoint, dataloader, device='cuda')
+
+# Save to CSV
+image_path = f"./data/processed/DAE_Embeddings.csv"
+df = pd.DataFrame(embeddings)
+df['label'] = labels
+df.to_csv(image_path, index=False)
+
+print(f"Embeddings shape: {embeddings.shape}, Labels shape: {labels.shape}")
+print("Embeddings saved to embeddings.csv")

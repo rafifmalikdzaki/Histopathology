@@ -1,0 +1,1143 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    python_version: 3.9.19
+    cli_version: 0.17.5
+    framework: lightning
+    is_jupyter_run: false
+    is_kaggle_kernel: true
+    start_time: 1722079247
+    t:
+      1:
+      - 1
+      - 5
+      - 9
+      - 41
+      - 53
+      - 55
+      - 103
+      - 105
+      2:
+      - 1
+      - 5
+      - 9
+      - 41
+      - 53
+      - 55
+      - 103
+      - 105
+      3:
+      - 1
+      - 2
+      - 7
+      - 23
+      - 62
+      - 66
+      4: 3.9.19
+      5: 0.17.5
+      8:
+      - 2
+      - 5
+      13: linux-x86_64
+    m:
+    - 1: trainer/global_step
+      6:
+      - 3
+    - 1: lr-Adam
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.reconstructtion\.convs\.0\.conv\.spline_weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.reconstructtion\.convs\.0\.conv\.spline_weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.reconstructtion\.convs\.0\.conv\.spline_weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.reconstructtion\.convs\.0\.conv\.spline_scaler._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.reconstructtion\.convs\.0\.conv\.spline_scaler.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.reconstructtion\.convs\.0\.conv\.spline_scaler.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.reconstructtion\.convs\.0\.conv\.base_weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.reconstructtion\.convs\.0\.conv\.base_weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.reconstructtion\.convs\.0\.conv\.base_weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.Output_Layer\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder2\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.2\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.2\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.2\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.2\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.2\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.2\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.decoder1\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.ECA_Net\.conv\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.ECA_Net\.conv\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.ECA_Net\.conv\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.kan\.convs\.0\.conv\.spline_weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.kan\.convs\.0\.conv\.spline_weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.kan\.convs\.0\.conv\.spline_weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.kan\.convs\.0\.conv\.spline_scaler._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.kan\.convs\.0\.conv\.spline_scaler.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.kan\.convs\.0\.conv\.spline_scaler.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.kan\.convs\.0\.conv\.base_weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.kan\.convs\.0\.conv\.base_weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.kan\.convs\.0\.conv\.base_weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder3\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder2\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_decoder\.encoder1\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.decoder\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder2\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.bn\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.bn\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.bn\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.bn\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.bn\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.bn\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv3\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv3\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv3\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv3\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv3\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv3\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.4\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.4\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.4\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.4\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.4\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.4\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.3\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.3\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.3\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.3\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.3\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.3\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv2\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.spatial_attn\.conv1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.bn\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.bn\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.bn\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.bn\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.bn\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.bn\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.2\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.2\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.2\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.2\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.2\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.2\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.attn1\.channel_attn\.mlp\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.bottleneck\.encoder1\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder2\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.2\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.2\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.2\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.2\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.2\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.2\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.decoder1\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.ECA_Net\.conv\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.ECA_Net\.conv\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.ECA_Net\.conv\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.kan\.convs\.0\.conv\.spline_weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.kan\.convs\.0\.conv\.spline_weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.kan\.convs\.0\.conv\.spline_weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.kan\.convs\.0\.conv\.spline_scaler._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.kan\.convs\.0\.conv\.spline_scaler.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.kan\.convs\.0\.conv\.spline_scaler.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.kan\.convs\.0\.conv\.base_weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.kan\.convs\.0\.conv\.base_weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.kan\.convs\.0\.conv\.base_weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder3\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder2\.0\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.1\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.1\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.1\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.1\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.1\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.1\.bias.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.0\.weight._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.0\.weight.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.0\.weight.bins
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.0\.bias._type
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.0\.bias.values
+      5: 1
+      6:
+      - 1
+    - 1: gradients/model\.ae_encoder\.encoder1\.0\.bias.bins
+      5: 1
+      6:
+      - 1
