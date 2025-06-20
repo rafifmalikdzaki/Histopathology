@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from interpolation import linear_interpolation
+from scipy.interpolate import interp1d as linear_interpolation
 
 
 def phi(x, w1, w2, b1, b2, n_sin):

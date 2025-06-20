@@ -10,6 +10,7 @@ setup(
         'torchmetrics',
         'wandb',
         'torchvision',
-        'lpips'
+        'lpips',
+        'scipy'
     ],
 )
