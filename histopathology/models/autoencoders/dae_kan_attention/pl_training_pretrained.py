@@ -119,25 +119,6 @@ from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
 
 
-class ImageDataset(Dataset):
-    def __init__(self, image_dir):
-        """
-        Args:
-            image_dir (string): Directory with all the images.
-            transform (callable, optional): Optional transform to be applied on a sample.
-        """
-        self.image_dir = image_dir
-        self.image_files = [f for f in os.listdir(image_dir) if os.path.isfile(os.path.join(image_dir, f))]
-
-    def __len__(self):
-        return len(self.image_files)
-
-    def __getitem__(self, idx):
-        img_name = os.path.join(self.image_dir, self.image_files[idx])
-        image = torchvision.io.read_image(img_name)
-        image = image.type(torch.float32) / 255
-
-        return image.to('cuda')
 
 
 # Define the image directory
