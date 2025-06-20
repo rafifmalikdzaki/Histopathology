@@ -221,9 +221,6 @@ data/
 *.xls
 
 # Model files and checkpoints
-*.pth
-*.pt
-*.ckpt
 *.pb
 *.onnx
 *.tflite
@@ -231,7 +228,6 @@ data/
 *.model
 *.bin
 *.safetensors
-*.weights
 
 # Video and audio files
 *.mp4
@@ -268,8 +264,13 @@ results/
 outputs/
 experiments/
 checkpoints/
-models/
+# Large model files (exclude specific patterns)
+*.pth
+*.pt
+*.ckpt
 weights/
+# Exclude old models backup directory
+histopathology/models_old/
 
 # Compressed archives (often large)
 *.zip

@@ -197,7 +197,55 @@ dvc pull
 ls histopathology/data/processed/HeparUnifiedPNG/
 ```
 
-## 4. Installation & Environment Setup
+## 4. Repository Structure
+
+```
+Histopathology/
+├── histopathology/
+│   ├── data/                     # Data handling and preprocessing
+│   │   ├── datasets/            # Dataset implementations
+│   │   ├── preprocessing/       # Data preprocessing utilities
+│   │   └── utils/              # Data utility functions
+│   ├── models/                  # Reorganized model implementations
+│   │   ├── autoencoders/       # Autoencoder architectures
+│   │   │   ├── dae_kan_attention/  # Main DAE+KAN+Attention model
+│   │   │   ├── deep_embedded_clustering/  # DEC implementations
+│   │   │   ├── vanilla_vae/     # Standard VAE
+│   │   │   └── variational/     # VaDE and other VAE variants
+│   │   ├── components/          # Reusable model components
+│   │   │   ├── attention_mechanisms/  # Attention modules (BAM, ECA, etc.)
+│   │   │   └── kan/            # KAN layer implementations
+│   │   ├── experiments/         # Training and evaluation scripts
+│   │   └── utils/              # Model utilities
+│   ├── training/               # Training orchestration
+│   │   ├── lightning/          # PyTorch Lightning modules
+│   │   ├── losses/             # Custom loss functions
+│   │   └── optimizers/         # Optimizer configurations
+│   ├── evaluation/             # Model evaluation and metrics
+│   ├── visualization/          # Plotting and visualization tools
+│   └── utils/                  # General utilities
+├── experiments/                # Experiment configurations and results
+├── scripts/                    # Standalone scripts for data processing
+├── tests/                      # Unit and integration tests
+├── docs/                       # Documentation
+├── pyproject.toml             # Poetry configuration
+├── README.md                  # This file
+└── .gitignore                # Git ignore rules
+```
+
+### Key Changes in Models Organization
+
+The models directory has been **completely reorganized** for better maintainability:
+
+- **Flattened nested repositories**: Removed git submodules and nested repos
+- **Clear separation of concerns**: Models, components, and experiments in separate directories
+- **Reusable components**: Attention mechanisms and KAN layers in dedicated component directories
+- **Better imports**: Proper relative imports with __init__.py files
+- **Comprehensive documentation**: README files for each major component
+
+**Migration Note**: The old models structure has been moved to `models_old/` for reference.
+
+## 5. Installation & Environment Setup
 
 ### Prerequisites
 
