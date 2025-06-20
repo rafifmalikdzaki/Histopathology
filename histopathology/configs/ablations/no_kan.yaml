@@ -3,5 +3,20 @@ defaults:
   - base
   - _self_
 
+# Ablation identifier (used for tracking and logging)
+ablation:
+  id: "no_kan"
+  description: "Model without KAN layers"
+
+# Model configuration override
 model:
-  use_kan: False
+  use_kan: false
+
+# Override these settings from experiments.yaml
+wandb:
+  tags: ['autoencoder', 'attention', 'histopathology', 'ablation', 'no_kan']
+  log_artifacts: false
+
+callbacks:
+  model_checkpoint:
+    save_top_k: 1

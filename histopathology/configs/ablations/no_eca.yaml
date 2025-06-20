@@ -1,7 +1,22 @@
-# Ablation config without ECA attention
+# Ablation config without ECA layers
 defaults:
   - base
   - _self_
 
+# Ablation identifier (used for tracking and logging)
+ablation:
+  id: "no_eca"
+  description: "Model without Efficient Channel Attention"
+
+# Model configuration override
 model:
-  use_eca: False
+  use_eca: false
+
+# Override these settings from experiments.yaml
+wandb:
+  tags: ['autoencoder', 'kan', 'histopathology', 'ablation', 'no_eca']
+  log_artifacts: false
+
+callbacks:
+  model_checkpoint:
+    save_top_k: 1

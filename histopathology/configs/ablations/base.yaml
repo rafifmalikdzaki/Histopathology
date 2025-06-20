@@ -2,13 +2,28 @@
 defaults:
   - _self_
 
+# Ablation identifier (used for tracking and logging)
+ablation:
+  id: "base"
+  description: "Base configuration with all components enabled"
+
+# Model configuration
 model:
-  use_kan: True
-  use_bam: True  
-  use_eca: True
+  use_kan: true
+  use_bam: true  
+  use_eca: true
   kan_options:
     kernel_size: [5, 5]
     padding: [2, 2]
   reconstruction_options:
     kernel_size: [3, 3]
     padding: [1, 1]
+
+# Override these settings from experiments.yaml
+wandb:
+  tags: ['autoencoder', 'kan', 'attention', 'histopathology', 'ablation', 'base']
+  log_artifacts: false
+
+callbacks:
+  model_checkpoint:
+    save_top_k: 1

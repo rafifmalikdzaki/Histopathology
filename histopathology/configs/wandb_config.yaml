@@ -1,0 +1,171 @@
+# Histopathology DAE-KAN-Attention WandB Configuration
+# Comprehensive settings for training, evaluation, and visualization
+
+# Model architecture configuration
+model:
+  use_kan: true  # Enable Kolmogorov-Arnold Networks
+  use_eca: true  # Enable Efficient Channel Attention
+  use_bam: true  # Enable Bottleneck Attention Module
+  kan_options:
+    kernel_size: [5, 5]
+    padding: [2, 2]
+    recon_kernel_size: [3, 3]
+    recon_padding: [1, 1]
+  interpretability:
+    enable_hooks: true  # Enable activation hooks for interpretability
+    enable_captum: true  # Enable Captum integration
+    enable_gradcam: true  # Enable GradCAM visualization
+    store_activations: true  # Store intermediate activations
+
+# Training parameters
+training:
+  batch_size: 16
+  max_epochs: 100
+  precision: '16-mixed'  # Use mixed precision for faster training
+  mask_ratio: 0.4  # Ratio for masking during robustness training
+  noise_level: 0.3  # Noise level for robustness training
+  gradient_clip_val: 0.5  # Clip gradients to prevent explosion
+  accumulate_grad_batches: 2  # Accumulate gradients for larger effective batch size
+  num_workers: 4  # Number of data loading workers
+  seed: 42  # Random seed for reproducibility
+  validation_frequency: 1  # Validate every N epochs
+  curriculum:
+    enable: true  # Enable curriculum learning
+    steps: 1000  # Number of steps for curriculum progression
+
+# Dataset configuration
+dataset:
+  image_size: 128  # Target image size
+  normalize: true  # Normalize images
+  augmentations:
+    horizontal_flip: true
+    vertical_flip: true
+    rotation: 15  # Max rotation angle
+    color_jitter:
+      brightness: 0.1
+      contrast: 0.1
+      saturation: 0.1
+      hue: 0.05
+  data_dir: 'histopathology/data'  # Data directory
+  cache_in_memory: false  # Cache dataset in memory
+
+# Optimizer configuration
+optimizer:
+  type: 'adamw'  # Optimizer type
+  lr: 2.0e-4  # Learning rate
+  weight_decay: 1.0e-4  # Weight decay for regularization
+  betas: [0.9, 0.95]  # Beta parameters for Adam optimizer
+
+# Learning rate scheduler
+scheduler:
+  type: 'onecycle'  # Scheduler type (onecycle, cosine, reduce_on_plateau)
+  max_lr: 2.0e-4  # Maximum learning rate
+  pct_start: 0.3  # Percentage of iterations for increasing LR
+  div_factor: 25  # Initial learning rate division factor
+  final_div_factor: 1000  # Final learning rate division factor
+  # Alternative schedulers (uncomment to use)
+  # cosine:
+  #   T_max: 100  # Number of epochs
+  #   eta_min: 1.0e-6  # Minimum learning rate
+  # reduce_on_plateau:
+  #   patience: 5  # Epochs to wait before reducing LR
+  #   factor: 0.5  # Factor to reduce LR by
+  #   min_lr: 1.0e-6  # Minimum learning rate
+
+# WandB logging configuration
+wandb:
+  project: 'histo-dae-robust'  # Project name
+  entity: null  # Team/organization (null for default)
+  name: 'dae-kan-attention'  # Run name (will be appended with timestamp)
+  tags: ['autoencoder', 'kan', 'attention', 'histopathology']  # Tags for organization
+  log_model: true  # Save model checkpoint to WandB
+  log_artifacts: false  # Save additional artifacts
+  log_code: true  # Save code snapshot
+  notes: 'DAE-KAN-Attention model with enhanced interpretability and WandB logging'
+  group: null  # Group for comparing runs (null for none)
+  job_type: 'train'  # Job type (train, eval, etc.)
+
+# Callbacks configuration
+callbacks:
+  early_stopping:
+    monitor: 'val_psnr'  # Metric to monitor
+    patience: 15  # Epochs to wait before stopping
+    mode: 'max'  # Mode (max for metrics like PSNR)
+    min_delta: 0.1  # Minimum change to count as improvement
+  model_checkpoint:
+    monitor: 'val_psnr'  # Metric to monitor
+    save_top_k: 1  # Number of best models to save
+    mode: 'max'  # Mode (max for metrics like PSNR)
+    save_last: true  # Save last model checkpoint
+
+# Advanced logging settings
+advanced_logging:
+  # System metrics
+  log_system_metrics: true  # Log GPU/CPU usage
+  log_system_freq: 50  # Frequency (batches)
+  
+  # Gradient logging
+  log_gradients: true  # Log gradient norms
+  log_gradients_freq: 50  # Frequency (batches)
+  log_gradient_histograms: false  # Log histograms of gradients - disabled to reduce overhead
+  log_weight_histograms: false  # Log histograms of weights - disabled to reduce overhead
+  
+  # Activation logging
+  log_activations: true  # Log activation statistics
+  log_activation_freq: 200  # Frequency (batches)
+  
+  # Feature visualization
+  log_latent_freq: 200  # Frequency for latent space visualization
+  log_attention_freq: 500  # Frequency for attention maps
+  log_gradcam_freq: 1000  # Frequency for GradCAM visualization
+  
+  # Parameter tracking
+  track_params: true  # Track parameter changes
+  
+  # Clustering analysis
+  track_cluster_evolution: true  # Track cluster changes over time
+  n_clusters: 5  # Number of clusters for analysis
+  
+  # Feature dimensionality reduction
+  dimensionality_reduction:
+    use_pca: true
+    use_tsne: false  # Disabled to reduce computational overhead
+    use_umap: false  # Disabled to reduce computational overhead
+    perplexity: 5  # t-SNE perplexity
+    
+  # Visualization samples
+  n_samples_viz: 16  # Number of samples for visualization
+  
+  # Layer-specific analysis
+  track_layers:
+    - 'encoder/encoder3'
+    - 'bottleneck/encoder2'
+    - 'decoder/final_conv'
+    
+  # Reconstruction visualization
+  log_reconstruction_diff: true  # Log difference maps
+  log_individual_samples: true  # Log individual sample reconstructions
+
+# Representation learning analysis
+representation_analysis:
+  feature_correlation: true  # Analyze feature correlations
+  feature_importance: true  # Analyze feature importance
+  cluster_quality_metrics: true  # Track cluster quality
+  latent_space_interpolation: true  # Generate latent space interpolations
+  nearest_neighbors: 5  # Number of nearest neighbors to analyze
+  outlier_detection: true  # Detect outliers in latent space
+  
+# Experiment ablation studies
+ablations:
+  base_experiment: 'base'  # Base experiment name
+  variants:
+    - 'no_kan'  # Disable KAN layers
+    - 'no_eca'  # Disable ECA attention
+    - 'no_bam'  # Disable BAM attention
+
+# Export settings
+export:
+  format: 'onnx'  # Export format (onnx, torchscript)
+  quantization: false  # Apply quantization
+  optimization_level: 1  # Optimization level
+  include_preprocessing: true  # Include preprocessing in exported model

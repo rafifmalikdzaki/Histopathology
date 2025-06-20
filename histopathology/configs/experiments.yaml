@@ -1,0 +1,218 @@
+# Histopathology DAE-KAN-Attention Experiments Configuration
+# Define multiple experiment configurations for sequential or batch training
+
+# Define hardware settings
+hardware:
+  gpu: 0
+  num_workers: 4
+
+# Common settings across all experiments
+defaults:
+  model:
+    use_kan: true
+    use_eca: true
+    use_bam: true
+    kan_options:
+      kernel_size: [5, 5]
+      padding: [2, 2]
+      recon_kernel_size: [3, 3]
+      recon_padding: [1, 1]
+    interpretability:
+      enable_hooks: true
+      enable_captum: true
+      enable_gradcam: true
+      store_activations: true
+  
+  training:
+    batch_size: 16
+    max_epochs: 100
+    precision: '16-mixed'
+    mask_ratio: 0.4
+    noise_level: 0.3
+    gradient_clip_val: 0.5
+    accumulate_grad_batches: 2
+    num_workers: 4
+    seed: 42
+    validation_frequency: 1
+  
+  dataset:
+    image_size: 128
+    normalize: true
+    augmentations:
+      horizontal_flip: true
+      vertical_flip: true
+      rotation: 15
+      color_jitter:
+        brightness: 0.1
+        contrast: 0.1
+        saturation: 0.1
+        hue: 0.05
+    data_dir: 'histopathology/data'
+    cache_in_memory: false
+  
+  optimizer:
+    type: 'adamw'
+    lr: 2.0e-4
+    weight_decay: 1.0e-4
+    betas: [0.9, 0.95]
+  
+  scheduler:
+    type: 'onecycle'
+    max_lr: 2.0e-4
+    pct_start: 0.3
+    div_factor: 25
+    final_div_factor: 1000
+  
+  wandb:
+    project: 'histo-dae-robust'
+    entity: null
+    name: 'dae-kan-attention'
+    tags: ['autoencoder', 'kan', 'attention', 'histopathology']
+    log_model: true
+    log_artifacts: false
+    log_code: true
+    notes: 'DAE-KAN-Attention model with enhanced interpretability and WandB logging'
+    group: null
+    job_type: 'train'
+  
+  callbacks:
+    early_stopping:
+      monitor: 'val_psnr'
+      patience: 15
+      mode: 'max'
+      min_delta: 0.1
+    model_checkpoint:
+      monitor: 'val_psnr'
+      save_top_k: 1
+      mode: 'max'
+      save_last: true
+  
+  advanced_logging:
+    log_system_metrics: true
+    log_system_freq: 50
+    log_gradients: true
+    log_gradients_freq: 50
+    log_gradient_histograms: false
+    log_weight_histograms: false
+    log_activations: true
+    log_activation_freq: 200
+    log_latent_freq: 200
+    log_attention_freq: 500
+    log_gradcam_freq: 1000
+    track_params: true
+    track_cluster_evolution: true
+    n_clusters: 5
+    dimensionality_reduction:
+      use_pca: true
+      use_tsne: false
+      use_umap: false
+      perplexity: 5
+    n_samples_viz: 16
+    track_layers:
+      - 'encoder/encoder3'
+      - 'bottleneck/encoder2'
+      - 'decoder/final_conv'
+    log_reconstruction_diff: true
+    log_individual_samples: true
+
+# Define experiment variations
+experiments:
+  # Baseline experiment with default settings
+  baseline:
+    name: "baseline"
+    description: "Default DAE-KAN-Attention configuration"
+    # Uses all defaults
+  
+  # Learning rate variations
+  high_lr:
+    name: "high_lr"
+    description: "Higher learning rate"
+    optimizer:
+      lr: 5.0e-4
+    scheduler:
+      max_lr: 5.0e-4
+  
+  low_lr:
+    name: "low_lr"
+    description: "Lower learning rate"
+    optimizer:
+      lr: 1.0e-4
+    scheduler:
+      max_lr: 1.0e-4
+  
+  # Noise level variations
+  high_noise:
+    name: "high_noise"
+    description: "Higher noise level for robustness"
+    training:
+      noise_level: 0.5
+      mask_ratio: 0.6
+  
+  low_noise:
+    name: "low_noise"
+    description: "Lower noise level for fine details"
+    training:
+      noise_level: 0.1
+      mask_ratio: 0.2
+  
+  # Batch size variations
+  large_batch:
+    name: "large_batch"
+    description: "Larger batch size for faster training"
+    training:
+      batch_size: 32
+      accumulate_grad_batches: 1
+  
+  small_batch:
+    name: "small_batch"
+    description: "Smaller batch size for better generalization"
+    training:
+      batch_size: 8
+      accumulate_grad_batches: 4
+  
+  # Scheduler variations
+  cosine_scheduler:
+    name: "cosine_scheduler"
+    description: "Cosine annealing learning rate scheduler"
+    scheduler:
+      type: "cosine"
+      T_max: 100
+      eta_min: 1.0e-6
+  
+  plateau_scheduler:
+    name: "plateau_scheduler"
+    description: "Reduce on plateau learning rate scheduler"
+    scheduler:
+      type: "reduce_on_plateau"
+      patience: 5
+      factor: 0.5
+      min_lr: 1.0e-6
+  
+  # Encoder/decoder capacity variations
+  high_capacity:
+    name: "high_capacity"
+    description: "Increased model capacity"
+    model:
+      high_capacity: true
+      kan_options:
+        kernel_size: [7, 7]
+        padding: [3, 3]
+  
+  low_capacity:
+    name: "low_capacity"
+    description: "Reduced model capacity"
+    model:
+      low_capacity: true
+      kan_options:
+        kernel_size: [3, 3]
+        padding: [1, 1]
+
+# List experiments to run (used by the launcher script)
+experiment_list:
+  - baseline
+  - high_lr
+  - low_lr
+  - high_noise
+  - low_noise
+  - cosine_scheduler
+  - plateau_scheduler

@@ -1,7 +1,22 @@
-# Ablation config without BAM attention
+# Ablation config without BAM layers
 defaults:
   - base
   - _self_
 
+# Ablation identifier (used for tracking and logging)
+ablation:
+  id: "no_bam"
+  description: "Model without Bottleneck Attention Module"
+
+# Model configuration override
 model:
-  use_bam: False
+  use_bam: false
+
+# Override these settings from experiments.yaml
+wandb:
+  tags: ['autoencoder', 'kan', 'histopathology', 'ablation', 'no_bam']
+  log_artifacts: false
+
+callbacks:
+  model_checkpoint:
+    save_top_k: 1
