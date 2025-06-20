@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from ...components.attention_mechanisms.bam import BAM
-from ...components.attention_mechanisms.eca import ECALayer
-from ...components.kan.kan_layer import KANLayer
+from histopathology.models.components.attention_mechanisms.bam import BAM
+from histopathology.models.components.attention_mechanisms.eca import ECALayer
+from histopathology.models.components.kan.kan_layer import KANLayer
 from .KANConv import KAN_Convolutional_Layer as KANCL
 
 class Autoencoder_Encoder(nn.Module):
