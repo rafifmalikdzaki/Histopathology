@@ -2,6 +2,7 @@ from torch import nn
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
+import torchmetrics
 from model import DAE_KAN_Attention
 from histopathology_dataset import *
 from torch.utils.data import Dataset, DataLoader
@@ -11,6 +12,13 @@ class MyModel(pl.LightningModule):
     def __init__(self):
         super(MyModel, self).__init__()
         self.model = DAE_KAN_Attention()
+        
+        # Initialize metrics
+        self.train_psnr = torchmetrics.PSNR()
+        self.train_ssim = torchmetrics.StructuralSimilarityIndexMeasure()
+        self.val_psnr = torchmetrics.PSNR()
+        self.val_ssim = torchmetrics.StructuralSimilarityIndexMeasure()
+        self.val_mae = torchmetrics.MeanAbsoluteError()
 
     def forward(self, x):
         encoded, decoded, z = self.model(x)
@@ -29,12 +37,19 @@ class MyModel(pl.LightningModule):
         # Total loss with regularization
         loss = mse_loss + reg_loss * 0.5  # Scale regularization
 
-        # Logging losses
+        # Update metrics
+        self.train_psnr(decoded, x)
+        self.train_ssim(decoded, x)
+        
+        # Logging losses and metrics
         self.log_dict({
             'train_loss': loss,
             'train_mse_loss': mse_loss,
-            'train_reg_loss': reg_loss
-        }, on_epoch=True)
+            'train_reg_loss': reg_loss,
+            'train_psnr': self.train_psnr,
+            'train_ssim': self.train_ssim,
+            'learning_rate': self.trainer.optimizers[0].param_groups[0]['lr']
+        }, on_epoch=True, prog_bar=True)
 
         return loss
 
@@ -48,11 +63,40 @@ class MyModel(pl.LightningModule):
         # Total loss
         loss = mse_loss
 
-        # Logging losses
-        self.log('val_loss', loss, on_epoch=True)
-        self.log('val_mse_loss', mse_loss, on_epoch=True)
+        # Update metrics
+        self.val_psnr(decoded, x)
+        self.val_ssim(decoded, x)
+        self.val_mae(decoded, x)
+        
+        # Log metrics
+        self.log_dict({
+            'val_loss': loss,
+            'val_mse_loss': mse_loss,
+            'val_psnr': self.val_psnr,
+            'val_ssim': self.val_ssim,
+            'val_mae': self.val_mae
+        }, on_epoch=True, prog_bar=True)
+        
+        # Log sample reconstructions
+        if batch_idx == 0:
+            self._log_reconstructions(x, decoded)
 
         return loss
+
+    def _log_reconstructions(self, original, reconstructed):
+        # Log first 4 samples from batch
+        images = []
+        for i in range(min(4, original.shape[0])):
+            img_pair = torch.cat([
+                original[i].cpu(), 
+                reconstructed[i].cpu()
+            ], dim=-1)
+            images.append(wandb.Image(img_pair, caption=f"Sample {i}"))
+        
+        self.logger.experiment.log({
+            "Reconstructions": images,
+            "epoch": self.current_epoch
+        })
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.parameters(), lr=0.001, weight_decay=1e-4)

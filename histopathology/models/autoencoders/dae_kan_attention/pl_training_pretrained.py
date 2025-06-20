@@ -11,6 +11,12 @@ class MyModel(pl.LightningModule):
     def __init__(self):
         super(MyModel, self).__init__()
         self.model = DAE_KAN_Attention()
+        
+        # Initialize metrics
+        self.val_psnr = torchmetrics.PSNR()
+        self.val_ssim = torchmetrics.StructuralSimilarityIndexMeasure()
+        self.val_mae = torchmetrics.MeanAbsoluteError()
+        self.val_lpips = torchmetrics.image.lpip.LearnedPerceptualImagePatchSimilarness(net_type='vgg')
 
     def forward(self, x):
         encoded, decoded, z = self.model(x)
@@ -52,15 +58,19 @@ class MyModel(pl.LightningModule):
         loss = mse_loss
 
         # Calculate image metrics
-        psnr = 10 * torch.log10(1 / mse_loss)
-        ssim = torchmetrics.functional.structural_similarity_index_measure(decoded, x)
+        self.val_psnr.update(decoded, x)
+        self.val_ssim.update(decoded, x)
+        self.val_mae.update(decoded, x)
+        self.val_lpips.update(decoded, x)
 
         # Log metrics
         self.log_dict({
             'val_loss': loss,
             'val_mse_loss': mse_loss,
-            'val_psnr': psnr,
-            'val_ssim': ssim
+            'val_psnr': self.val_psnr,
+            'val_ssim': self.val_ssim,
+            'val_mae': self.val_mae,
+            'val_lpips': self.val_lpips
         }, on_epoch=True, prog_bar=True)
 
         # Log sample reconstructions
