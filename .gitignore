@@ -264,6 +264,9 @@ results/
 outputs/
 experiments/
 checkpoints/
+wandb/
+*.wandb
+
 # Large model files (exclude specific patterns)
 *.pth
 *.pt
@@ -286,6 +289,7 @@ histopathology/models_old/
 *.tmp
 *.temp
 *.bak
+*.bak2
 *.backup
 *.old
 *.out
@@ -312,3 +316,25 @@ Thumbs.db
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 .aider*
+
+# Development and test files
+test_*.py
+*_test.py
+test_model.py
+test_dimensions.py
+
+# Legacy and alternative implementations
+legacy_*.py
+minimal_*.py
+simplified_*.py
+*_old.*
+
+# Tool directories
+embedding_tools/
+scripts/
+
+# Temporary development files
+dae_kan_embedding.py
+data_module.py
+organize_images.py
+list
