@@ -33,7 +33,7 @@ class MyModel(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, _ = batch
+        x = batch
         encoded, decoded, z = self.forward(x)
 
         # MSE loss between input and reconstruction

@@ -50,7 +50,7 @@ class Autoencoder_Encoder(nn.Module):
         )
 
         self.decoder2 = nn.Sequential(
-            nn.ConvTranspose2d(128, 384, kernel_size=3, padding=1, stride=2, output_padding=1),
+            nn.ConvTranspose2d(16, 384, kernel_size=3, padding=1, stride=2, output_padding=1),
             nn.BatchNorm2d(384),
             nn.ELU(inplace=True), 
         )
