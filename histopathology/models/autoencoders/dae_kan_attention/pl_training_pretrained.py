@@ -23,12 +23,18 @@ class MyModel(pl.LightningModule):
         # MSE loss between input and reconstruction
         mse_loss = nn.MSELoss()(x, decoded)
 
-        # Total loss
-        loss = mse_loss
+        # KAN regularization loss
+        reg_loss = self.model.regularization_loss()
+        
+        # Total loss with regularization
+        loss = mse_loss + reg_loss * 0.5  # Scale regularization
 
         # Logging losses
-        self.log('train_loss', loss, on_epoch=True)
-        self.log('train_mse_loss', mse_loss, on_epoch=True)
+        self.log_dict({
+            'train_loss': loss,
+            'train_mse_loss': mse_loss,
+            'train_reg_loss': reg_loss
+        }, on_epoch=True)
 
         return loss
 
@@ -49,10 +55,11 @@ class MyModel(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=0.0015)
-        return {
-            'optimizer': optimizer,
-        }
+        optimizer = torch.optim.AdamW(self.parameters(), lr=2e-4, weight_decay=1e-4)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=50, eta_min=1e-6
+        )
+        return [optimizer], [scheduler]
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

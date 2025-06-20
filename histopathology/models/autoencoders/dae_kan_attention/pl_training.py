@@ -23,12 +23,18 @@ class MyModel(pl.LightningModule):
         # MSE loss between input and reconstruction
         mse_loss = nn.MSELoss()(x, decoded)
 
-        # Total loss
-        loss = mse_loss
+        # KAN regularization loss
+        reg_loss = self.model.regularization_loss()
+        
+        # Total loss with regularization
+        loss = mse_loss + reg_loss * 0.5  # Scale regularization
 
         # Logging losses
-        self.log('train_loss', loss, on_epoch=True)
-        self.log('train_mse_loss', mse_loss, on_epoch=True)
+        self.log_dict({
+            'train_loss': loss,
+            'train_mse_loss': mse_loss,
+            'train_reg_loss': reg_loss
+        }, on_epoch=True)
 
         return loss
 
@@ -49,15 +55,11 @@ class MyModel(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=0.01)
-        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.2, patience=5, min_lr=1e-6)
-        return {
-            'optimizer': optimizer,
-            'lr_scheduler': {
-                'scheduler': scheduler,
-                'monitor': 'val_loss'
-            }
-        }
+        optimizer = torch.optim.AdamW(self.parameters(), lr=0.001, weight_decay=1e-4)
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=30, eta_min=1e-5
+        )
+        return [optimizer], [scheduler]
 
 if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -83,9 +85,11 @@ if __name__ == '__main__':
 
     # Initialize the trainer
     trainer = pl.Trainer(
-        max_epochs=30,
+        max_epochs=100,
         logger=wandb_logger,
-        callbacks=[lr_monitor, checkpoint_callback]
+        callbacks=[lr_monitor, checkpoint_callback],
+        gradient_clip_val=1.0,
+        accumulate_grad_batches=2
     )
 
     # # Train the model
