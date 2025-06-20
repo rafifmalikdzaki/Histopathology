@@ -6,7 +6,8 @@ from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor, Mode
 import torchmetrics
 from torch.utils.data import DataLoader
 from histopathology.models.autoencoders.dae_kan_attention.model import DAE_KAN_Attention
-from histopathology.src.data.histopathology_dataset import ImageDataset, create_dataset
+from histopathology.src.data_pipeline.histopathology_dataset import ImageDataset
+from histopathology.src.data_pipeline.make_dataset import create_dataset
 import wandb
 import torchvision.transforms as T
 from torchvision.utils import make_grid
