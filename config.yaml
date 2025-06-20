@@ -1,0 +1,41 @@
+# Histopathology Autoencoder Data Module Configuration
+# This configuration is set up for testing the dual augmentation pipeline
+
+# --------------------------------------------------------------------------------------
+#  Dataset Location Settings
+# --------------------------------------------------------------------------------------
+root: ./data
+tsv: dataset.tsv
+remote_id: null  # Set to a Hugging Face dataset ID to use remote data
+
+# --------------------------------------------------------------------------------------
+#  Data Loader Settings
+# --------------------------------------------------------------------------------------
+batch_size: 8
+num_workers: 4
+seed: 42  # Set to null or -1 to disable deterministic behavior
+
+# --------------------------------------------------------------------------------------
+#  Preprocessing Settings
+# --------------------------------------------------------------------------------------
+interpolation: bicubic  # Options: nearest, linear, bilinear, bicubic, trilinear, area
+resize_size: 256  # Initial resize dimension before cropping
+crop_size: 224   # Final crop size
+
+# --------------------------------------------------------------------------------------
+#  Augmentation Settings
+# --------------------------------------------------------------------------------------
+# Augmentation strength
+rotate_deg: 15.0  # Maximum rotation in degrees
+zoom_range: [0.9, 1.1]  # Min and max zoom factors
+contrast_gamma: [0.9, 1.1]  # Contrast adjustment range
+aug_prob: 0.5  # Probability of applying each augmentation
+
+# --------------------------------------------------------------------------------------
+#  Autoencoder Specific Settings
+# --------------------------------------------------------------------------------------
+# Denoising settings
+noise_level: 0.3  # Standard deviation of Gaussian noise (0.0 to disable)
+
+# Masking settings (for MAE-style training)
+mask_ratio: 0.4  # Ratio of pixels to mask (0.0 to disable)

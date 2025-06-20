@@ -1,0 +1,44 @@
+{
+  "os": "Linux-6.15.2-zen1-1-zen-x86_64-with-glibc2.41",
+  "python": "CPython 3.11.9",
+  "startedAt": "2025-06-20T18:21:40.486193Z",
+  "args": [
+    "--config",
+    "histopathology/configs/ablations/base.yaml"
+  ],
+  "program": "-m histopathology.src.training.dae_kan_attention.pl_training_robust",
+  "git": {
+    "remote": "git@github.com:rafifmalikdzaki/Histopathology.git",
+    "commit": "a6145adcc33f93fb540e347617a17a208586a86f"
+  },
+  "root": "/home/dzakirm/Research/Histopathology",
+  "host": "IUABTW",
+  "executable": "/home/dzakirm/Research/Histopathology/.venv-py311/bin/python",
+  "cpu_count": 14,
+  "cpu_count_logical": 20,
+  "gpu": "NVIDIA GeForce RTX 3070 Ti Laptop GPU",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "1999860924416",
+      "used": "745807962112"
+    }
+  },
+  "memory": {
+    "total": "50181844992"
+  },
+  "cpu": {
+    "count": 14,
+    "countLogical": 20
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA GeForce RTX 3070 Ti Laptop GPU",
+      "memoryTotal": "8589934592",
+      "cudaCores": 5888,
+      "architecture": "Ampere",
+      "uuid": "GPU-8ee644e7-140f-fa03-2c8a-a31b65aae304"
+    }
+  ],
+  "cudaVersion": "12.9"
+}

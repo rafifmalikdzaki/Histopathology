@@ -1,0 +1,519 @@
+import os
+import torch
+from torch.utils.data import Dataset
+import torchvision
+import glob
+from pathlib import Path
+import numpy as np
+import logging
+from typing import Tuple, Optional, Dict, Any, Union
+from copy import deepcopy
+from torchvision import transforms
+
+logger = logging.getLogger(__name__)
+
+"""
+Enhanced Histopathology Dataset with Dual Augmentation Support
+--------------------------------------------------------------
+
+This module provides dataset implementations for both standard image classification 
+and autoencoder training with advanced augmentation capabilities:
+
+Key Features:
+- Dual augmentation pipeline (different transforms for input/target pairs)
+- Configurable noise injection for denoising autoencoder (DAE) training
+- Random masking for masked autoencoder (MAE) training 
+- Input validation and automatic normalization
+- Support for both standard and autoencoder training modes
+
+The ImageDataset class supports multiple training scenarios through its 'mode' parameter:
+- 'standard': Original behavior, returns only the image tensor (for classification)
+- 'autoencoder': Returns a dictionary with input_image, target_image, and label
+  where input_image and target_image have different augmentations
+  
+Usage Examples:
+--------------
+
+1. Standard Classification Training:
+   ```python
+   # Create dataset in standard mode (original behavior)
+   dataset = ImageDataset(images, labels, mode="standard")
+   
+   # Get a sample (returns just the image tensor)
+   image = dataset[0]  # shape: [C, H, W]
+   ```
+
+2. Basic Autoencoder Training:
+   ```python
+   # Create dataset with dual augmentation
+   dataset = ImageDataset(
+       images, 
+       mode="autoencoder",
+       noise_level=0.0,
+       mask_ratio=0.0
+   )
+   
+   # Get a sample (returns dictionary with input/target pairs)
+   sample = dataset[0]
+   input_img = sample["input_image"]   # First augmented version
+   target_img = sample["target_image"] # Second augmented version
+   ```
+
+3. Denoising Autoencoder Training:
+   ```python
+   # Create dataset with noise injection
+   dataset = ImageDataset(
+       images, 
+       mode="autoencoder",
+       noise_level=0.3,  # Add significant noise
+       mask_ratio=0.0    # No masking
+   )
+   
+   # The input will have noise applied, but target will be clean
+   sample = dataset[0]
+   noisy_input = sample["input_image"]  # Noisy version
+   clean_target = sample["target_image"] # Clean version
+   ```
+
+4. Masked Autoencoder Training:
+   ```python
+   # Create dataset with random masking
+   dataset = ImageDataset(
+       images, 
+       mode="autoencoder",
+       noise_level=0.0,  # No noise
+       mask_ratio=0.4    # Mask 40% of pixels
+   )
+   
+   # The input will have random pixels masked (set to zero)
+   sample = dataset[0]
+   masked_input = sample["input_image"]  # Masked version
+   full_target = sample["target_image"]  # Complete version
+   ```
+
+5. Combined DAE-MAE Training:
+   ```python
+   # Create dataset with both noise and masking
+   dataset = ImageDataset(
+       images, 
+       mode="autoencoder",
+       noise_level=0.3,  # Add noise
+       mask_ratio=0.4    # And masking
+   )
+   
+   # The input will have both noise and masking applied
+   sample = dataset[0]
+   corrupted_input = sample["input_image"]  # Noisy and masked
+   clean_target = sample["target_image"]    # Clean reference
+   ```
+"""
+
+def create_dataset(split: str = "train"):
+    """
+    Create a dataset for training or testing.
+    
+    Args:
+        split (str): Either "train" or "test"
+        
+    Returns:
+        Tuple of (images, labels) as tensors
+    """
+    # Input validation
+    if split not in ["train", "test", "val"]:
+        logger.warning(f"Invalid split '{split}', defaulting to 'train'")
+        split = "train"
+        
+    # Check if real image data exists in standard locations
+    data_dir = os.environ.get("DATA_DIR", "histopathology/data")
+    split_dir = os.path.join(data_dir, split)
+    
+    if os.path.exists(split_dir):
+        # Use real image data if available
+        image_files = glob.glob(os.path.join(split_dir, "**/*.png"), recursive=True)
+        if len(image_files) > 0:
+            print(f"Found {len(image_files)} real images for {split} split")
+            
+            # Load images
+            images = []
+            error_count = 0
+            max_files = min(100, len(image_files))  # Limit to 100 images for memory
+            
+            for img_path in image_files[:max_files]:
+                try:
+                    img = torchvision.io.read_image(img_path).float()
+                    
+                    # Normalize to [0, 1] range if needed
+                    if img.max() > 1.0:
+                        img = img / 255.0
+                        
+                    # Ensure correct shape (3, H, W)
+                    if img.shape[0] == 1:
+                        img = img.repeat(3, 1, 1)  # Convert grayscale to RGB
+                    elif img.shape[0] == 4:
+                        img = img[:3]  # Drop alpha channel if present
+                    elif img.shape[0] != 3:
+                        raise ValueError(f"Unexpected number of channels: {img.shape[0]}")
+                    
+                    # Resize to 128x128 if needed
+                    if img.shape[1] != 128 or img.shape[2] != 128:
+                        img = torchvision.transforms.Resize((128, 128))(img)
+                        
+                    # Check for invalid values
+                    if torch.isnan(img).any() or torch.isinf(img).any():
+                        raise ValueError("Image contains NaN or Inf values")
+                        
+                    # Ensure values are in [0, 1] range
+                    if img.min() < 0.0 or img.max() > 1.0:
+                        img = torch.clamp(img, 0.0, 1.0)
+                        
+                    images.append(img)
+                except Exception as e:
+                    error_count += 1
+                    if error_count < 5:  # Limit error messages to avoid spam
+                        print(f"Error loading {img_path}: {e}")
+                    elif error_count == 5:
+                        print("Suppressing further image loading error messages...")
+                    
+            if images:
+                X = torch.stack(images)
+                y = torch.zeros(len(images))  # Dummy labels
+                print(f"Successfully loaded {len(images)} images for {split} split")
+                return X, y
+    
+    # Fallback to synthetic data if no real data or loading failed
+    print(f"Using synthetic data for {split} split")
+    num_samples = 100 if split == "train" else 20
+    
+    # Create synthetic data with natural image-like structure
+    # Using a combination of sine waves for more natural patterns
+    h, w = 128, 128
+    X = torch.zeros(num_samples, 3, h, w)
+    
+    for i in range(num_samples):
+        # Create different frequency patterns for each channel
+        for c in range(3):
+            freq1 = torch.rand(1) * 10 + 1
+            freq2 = torch.rand(1) * 10 + 1
+            phase = torch.rand(1) * 2 * torch.pi
+            
+            # Create 2D grid
+            y_grid = torch.linspace(0, 1, h).view(-1, 1).repeat(1, w)
+            x_grid = torch.linspace(0, 1, w).view(1, -1).repeat(h, 1)
+            
+            # Generate patterns
+            pattern = (torch.sin(freq1 * x_grid + phase) + 
+                      torch.sin(freq2 * y_grid + phase) +
+                      torch.sin(freq1 * x_grid + freq2 * y_grid + phase))
+            
+            # Normalize to [0, 1]
+            pattern = (pattern - pattern.min()) / (pattern.max() - pattern.min() + 1e-8)
+            
+            # Add some noise
+            noise = torch.randn(h, w) * 0.1
+            pattern = pattern + noise
+            
+            # Ensure values are in [0, 1] range
+            pattern = torch.clamp(pattern, 0.0, 1.0)
+            
+            X[i, c] = pattern
+    
+    # Add noise to create variations between samples
+    X = X + torch.randn_like(X) * 0.05
+    X = torch.clamp(X, 0.0, 1.0)
+    
+    # Create dummy labels
+    y = torch.zeros(num_samples)
+    
+    return X, y
+
+class AutoencoderTransform:
+    """
+    Applies two different sets of augmentations to the same image.
+    
+    This transform is designed for autoencoder training where input and target images 
+    need different augmentations. It creates two differently augmented versions of the 
+    same input image, and optionally applies noise and/or masking to the input version.
+    
+    The transform pipeline includes:
+    1. Random horizontal and vertical flips
+    2. Random rotation
+    3. Color jitter (brightness, contrast, saturation, hue)
+    4. Optional Gaussian noise (input only)
+    5. Optional random masking (input only)
+    
+    Key benefits:
+    - Creates realistic variations between input and target
+    - Encourages the model to learn robust features
+    - Configurable noise and masking for different training strategies
+    
+    Example:
+    ```python
+    # Create transform with noise and masking
+    transform = AutoencoderTransform(noise_level=0.3, mask_ratio=0.4)
+    
+    # Apply to an image
+    input_img, target_img = transform(original_img)
+    
+    # input_img will have different augmentations, noise, and masking
+    # target_img will have different augmentations but no noise or masking
+    ```
+    """
+    def __init__(self, noise_level: float = 0.3, mask_ratio: float = 0.4):
+        """
+        Initialize the dual augmentation transform.
+        
+        Args:
+            noise_level: Noise standard deviation for denoising (0.0-1.0)
+            mask_ratio: Ratio of pixels to mask (0.0-1.0)
+        """
+        self.noise_level = noise_level
+        self.mask_ratio = mask_ratio
+        
+        # Create standard augmentation transform
+        self.transform = transforms.Compose([
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.5),
+            transforms.RandomRotation(15),
+            transforms.ColorJitter(
+                brightness=0.1,
+                contrast=0.1,
+                saturation=0.1,
+                hue=0.05
+            ),
+            # No normalization here - applied separately
+        ])
+    
+    def add_noise(self, img: torch.Tensor) -> torch.Tensor:
+        """
+        Add Gaussian noise for denoising autoencoder training.
+        
+        This method adds random Gaussian noise to the input image for training
+        denoising autoencoders. The noise level is controlled by the noise_level
+        parameter (0.0-1.0), with higher values creating more corruption.
+        
+        Args:
+            img: Input image tensor [C, H, W] with values in range [0, 1]
+            
+        Returns:
+            Noisy image tensor with values clamped to [0, 1]
+            
+        Note:
+            - Setting noise_level=0.0 disables noise (returns original image)
+            - Typical values range from 0.1 (subtle noise) to 0.5 (heavy noise)
+            - Results are clamped to ensure valid image range
+        """
+        if self.noise_level <= 0:
+            return img
+        
+        noise = torch.randn_like(img) * self.noise_level
+        return torch.clamp(img + noise, 0.0, 1.0)
+    
+    def apply_masking(self, img: torch.Tensor) -> torch.Tensor:
+        """
+        Apply random masking for masked autoencoder training.
+        
+        This method randomly masks (sets to zero) a portion of the input image pixels
+        for training masked autoencoders (MAE). The ratio of pixels to mask is controlled
+        by the mask_ratio parameter (0.0-1.0).
+        
+        Args:
+            img: Input image tensor [C, H, W] with values in range [0, 1]
+            
+        Returns:
+            Masked image tensor with same shape as input
+            
+        Note:
+            - Setting mask_ratio=0.0 disables masking (returns original image)
+            - Typical values range from 0.2 (light masking) to 0.75 (heavy masking)
+            - Masking is applied randomly across the spatial dimensions
+            - The same mask is applied to all channels
+        """
+        if self.mask_ratio <= 0:
+            return img
+        
+        # Create random mask (1 = keep, 0 = mask)
+        mask = torch.rand(img.shape[1:]) > self.mask_ratio  # [H, W]
+        mask = mask.float()
+        
+        # Expand mask to match image channels
+        mask = mask.expand_as(img)
+        
+        # Apply mask (multiply by mask to zero out masked regions)
+        return img * mask
+    
+    def __call__(self, img: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Apply different augmentations to create input and target pairs.
+        
+        Args:
+            img: Input image tensor [C, H, W]
+            
+        Returns:
+            Tuple of (input_image, target_image)
+        """
+        # Convert to PIL for torchvision transforms
+        if isinstance(img, torch.Tensor):
+            img_pil = transforms.ToPILImage()(img)
+        else:
+            img_pil = img
+            
+        # Create two differently augmented versions
+        target_img = self.transform(img_pil)
+        input_img = self.transform(img_pil)
+        
+        # Convert back to tensors
+        if not isinstance(target_img, torch.Tensor):
+            target_img = transforms.ToTensor()(target_img)
+            
+        if not isinstance(input_img, torch.Tensor):
+            input_img = transforms.ToTensor()(input_img)
+            
+        # Add noise and masking to input image only
+        input_img = self.add_noise(input_img)
+        input_img = self.apply_masking(input_img)
+        
+        return input_img, target_img
+
+class ImageDataset(Dataset):
+    """
+    Enhanced dataset for training with image tensors.
+    
+    This dataset class supports both standard classification training and
+    autoencoder training with dual augmentation. It takes pre-loaded image
+    tensors rather than loading from disk, making it efficient for in-memory
+    datasets.
+    
+    Key features:
+    - Supports both standard (original) and autoencoder modes
+    - Configurable noise and masking for autoencoder training
+    - Automatic input validation and normalization
+    - Dual augmentation with different transforms for input/target pairs
+    
+    When used in autoencoder mode, the dataset returns a dictionary with:
+    - input_image: Augmented image with optional noise and masking
+    - target_image: Differently augmented image without noise or masking
+    - label: The corresponding label (if provided)
+    
+    When used in standard mode, it simply returns the image tensor,
+    maintaining backward compatibility with existing code.
+    
+    Image requirements:
+    - Tensor shape: [N, C, H, W] where N is batch size, C is channels (3)
+    - Value range: [0, 1] (will be automatically normalized if outside range)
+    - Channel order: RGB
+    """
+    def __init__(self, images, labels=None, mode="standard", noise_level=0.3, mask_ratio=0.4):
+        """
+        Args:
+            images (torch.Tensor): Tensor of shape (N, C, H, W) containing images
+            labels (torch.Tensor, optional): Tensor of shape (N,) containing labels
+            mode (str): Either "standard" (original behavior) or "autoencoder" (dual augmentation)
+            noise_level (float): Noise level for denoising autoencoder (0.0-1.0)
+            mask_ratio (float): Ratio of pixels to mask (0.0-1.0)
+        """
+        # Input validation
+        if not isinstance(images, torch.Tensor):
+            raise TypeError(f"Images must be a torch.Tensor, got {type(images)}")
+            
+        if images.dim() != 4:
+            raise ValueError(f"Images must have 4 dimensions (N,C,H,W), got {images.dim()}")
+            
+        if images.shape[1] != 3:
+            raise ValueError(f"Images must have 3 channels, got {images.shape[1]}")
+            
+        # Check for proper normalization
+        if images.max() > 1.0 or images.min() < 0.0:
+            images = torch.clamp(images, 0.0, 1.0)
+            logger.warning("Images were not properly normalized. Clamped to [0, 1] range.")
+            
+        self.images = images
+        self.mode = mode
+        
+        # Handle labels
+        if labels is not None:
+            if not isinstance(labels, torch.Tensor):
+                raise TypeError(f"Labels must be a torch.Tensor, got {type(labels)}")
+                
+            if labels.dim() != 1:
+                raise ValueError(f"Labels must have 1 dimension, got {labels.dim()}")
+                
+            if len(labels) != len(images):
+                raise ValueError(f"Number of labels ({len(labels)}) must match number of images ({len(images)})")
+                
+            self.labels = labels
+        else:
+            self.labels = torch.zeros(len(images))
+            
+        # Create dual augmentation transform for autoencoder mode
+        if mode == "autoencoder":
+            self.transform = AutoencoderTransform(noise_level, mask_ratio)
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, idx):
+        """
+        Get a sample from the dataset.
+        
+        Args:
+            idx: Index of the sample to retrieve
+            
+        Returns:
+            In standard mode:
+                torch.Tensor: Image tensor with shape [C, H, W]
+                
+            In autoencoder mode:
+                Dict with keys:
+                    - "input_image": Augmented tensor with optional noise/masking
+                    - "target_image": Differently augmented tensor without noise/masking
+                    - "label": The corresponding label
+        
+        Raises:
+            ValueError: If the mode is not 'standard' or 'autoencoder'
+        
+        Examples:
+            # Standard mode
+            dataset = ImageDataset(images, mode="standard")
+            img = dataset[0]  # Returns tensor
+            
+            # Autoencoder mode
+            dataset = ImageDataset(images, mode="autoencoder")
+            sample = dataset[0]  # Returns dictionary
+            input_img = sample["input_image"]
+            target_img = sample["target_image"]
+        """
+        img = self.images[idx]
+        
+        if self.mode == "standard":
+            # Original behavior - return image only
+            return img
+        elif self.mode == "autoencoder":
+            # Autoencoder mode with dual augmentation
+            input_img, target_img = self.transform(img)
+            
+            # Return dictionary with input and target images
+            return {
+                "input_image": input_img, 
+                "target_image": target_img,
+                "label": self.labels[idx]
+            }
+        else:
+            raise ValueError(f"Unknown mode: {self.mode}. Use 'standard' or 'autoencoder'.")
+
+# Keep the original implementation for loading from directories
+class ImageFileDataset(Dataset):
+    def __init__(self, image_dir):
+        """
+        Args:
+            image_dir (string): Directory with all the images.
+        """
+        self.image_dir = image_dir
+        self.image_files = [f for f in os.listdir(image_dir) if f.endswith('.png')]
+
+    def __len__(self):
+        return len(self.image_files)
+
+    def __getitem__(self, idx):
+        img_name = os.path.join(self.image_dir, self.image_files[idx])
+        image = torchvision.io.read_image(img_name)
+        return image.float() / 255.0

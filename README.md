@@ -1,3 +1,268 @@
+# Histopathology Analysis with DAE-KAN-Attention
+
+A comprehensive deep learning framework for histopathology image analysis using Deep Autoencoders with Kolmogorov-Arnold Networks and attention mechanisms, featuring advanced interpretability tools and experiment tracking.
+
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-1.9+-ee4c2c.svg)](https://pytorch.org/)
+[![Lightning](https://img.shields.io/badge/Lightning-1.7+-792ee5.svg)](https://pytorchlightning.ai/)
+[![Weights & Biases](https://img.shields.io/badge/Weights%20%26%20Biases-Logging-FFBE00.svg)](https://wandb.ai/)
+
+## Project Overview
+
+This repository implements a state-of-the-art deep learning framework for histopathology image analysis with a focus on:
+
+- **Representation Learning**: Advanced feature extraction with Kolmogorov-Arnold Networks
+- **Attention Mechanisms**: Multi-scale attention for focusing on relevant tissue regions
+- **Interpretability**: Comprehensive tools for understanding model decisions
+- **Experiment Tracking**: Detailed logging with Weights & Biases
+- **Model Analysis**: Advanced tools for latent space visualization and clustering
+
+The core model is a Deep Autoencoder (DAE) enhanced with KAN layers and attention mechanisms (BAM and ECA), designed to learn meaningful representations of histopathology images. The model's interpretability features support attribution analysis using Captum, GradCAM visualizations, and attention map analysis.
+
+## Installation
+
+### Prerequisites
+
+- Python 3.8+
+- CUDA-compatible GPU (recommended)
+
+### Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/histopathology.git
+   cd histopathology
+   ```
+
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   ```
+
+3. Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Install optional dependencies for enhanced features:
+   ```bash
+   # For UMAP dimensionality reduction
+   pip install umap-learn
+
+   # For model interpretability
+   pip install captum
+   ```
+
+## Project Structure
+
+The project follows a modular structure:
+
+```
+histopathology/
+├── src/                       # Source code
+│   ├── models/                # Model implementations
+│   │   ├── autoencoders/      # Autoencoder models
+│   │   │   └── dae_kan_attention/  # DAE-KAN-Attention implementation
+│   │   └── components/        # Reusable model components
+│   │       ├── attention_mechanisms/  # Attention modules
+│   │       └── kan/           # KAN layer implementations
+│   ├── training/              # Training utilities
+│   │   └── dae_kan_attention/ # Training scripts for DAE-KAN
+│   ├── utils/                 # Utility functions
+│   ├── interpretability/      # Model interpretation tools
+│   ├── analysis/              # Analysis tools for latent representations
+│   └── data_pipeline/         # Data loading and preprocessing
+├── configs/                   # Configuration files
+│   ├── wandb_config.yaml      # Main configuration
+│   └── experiments/           # Experiment-specific configs
+├── notebooks/                 # Jupyter notebooks for analysis
+├── tests/                     # Test suite
+└── data/                      # Data directory (symlinked or actual)
+```
+
+## Configuration Guide
+
+The project uses YAML configuration files to manage model parameters, training settings, and experiment tracking. The main configuration file is `configs/wandb_config.yaml`.
+
+### Key Configuration Sections:
+
+1. **Model Configuration**:
+   ```yaml
+   model:
+     use_kan: true        # Enable KAN layers
+     use_eca: true        # Enable ECA attention
+     use_bam: true        # Enable BAM attention
+     kan_options:
+       kernel_size: [5, 5]
+       padding: [2, 2]
+   ```
+
+2. **Training Settings**:
+   ```yaml
+   training:
+     batch_size: 16
+     max_epochs: 100
+     precision: '16-mixed'  # Use mixed precision
+     mask_ratio: 0.4        # For robust training
+     noise_level: 0.3
+   ```
+
+3. **Weights & Biases Integration**:
+   ```yaml
+   wandb:
+     project: 'histo-dae-robust'
+     entity: null           # Your W&B username or team
+     tags: ['autoencoder', 'kan', 'attention']
+     log_model: true
+   ```
+
+4. **Advanced Logging**:
+   ```yaml
+   advanced_logging:
+     log_system_metrics: true
+     log_gradients: true
+     log_latent_freq: 500
+     track_cluster_evolution: true
+     n_clusters: 5
+   ```
+
+To create a new configuration file:
+```bash
+python -m histopathology.src.training.dae_kan_attention.pl_training_robust --create-config
+```
+
+## Usage Examples
+
+### Basic Training
+
+Train the model using the default configuration:
+
+```bash
+python -m histopathology.src.training.dae_kan_attention.pl_training_robust
+```
+
+### Custom Configuration
+
+Train with a custom configuration file:
+
+```bash
+python -m histopathology.src.training.dae_kan_attention.pl_training_robust \
+  --config path/to/your/config.yaml
+```
+
+### Using the Model for Inference
+
+```python
+from histopathology.src import DAE_KAN_Attention
+import torch
+
+# Load model
+model = DAE_KAN_Attention(device='cuda')
+model.load_state_dict(torch.load('path/to/checkpoint.ckpt'))
+model.eval()
+
+# Process an image
+image = torch.randn(1, 3, 128, 128).to('cuda')
+encoded, reconstructed, latent = model(image)
+
+# Analyze latent representation
+model.visualize_latent_space(method='pca')
+
+# Generate GradCAM visualization
+model.visualize_gradcam(image, target_layer_name='encoder/encoder3')
+```
+
+### Analyzing Model with Interpretability Tools
+
+```python
+from histopathology.src import DAE_KAN_Attention
+import torch
+import matplotlib.pyplot as plt
+
+# Load model and data
+model = DAE_KAN_Attention(device='cuda')
+model.load_state_dict(torch.load('path/to/checkpoint.ckpt'))
+model.eval()
+
+# Sample batch
+batch = torch.randn(4, 3, 128, 128).to('cuda')
+
+# Forward pass to capture activations
+encoded, decoded, latent = model(batch)
+
+# Get attention maps
+attention_maps = model.get_attention_maps()
+
+# Visualize layer activations
+fig = model.visualize_layer_activations('encoder/encoder3', sample_idx=0)
+plt.show()
+
+# Feature importance using Integrated Gradients
+attributions = model.get_feature_importance(
+    batch, 
+    target_layer='decoder', 
+    method='integrated_gradients'
+)
+```
+
+## Dependencies
+
+### Core Dependencies
+- PyTorch >= 1.9.0
+- PyTorch Lightning >= 1.7.0
+- torchvision >= 0.10.0
+- torchmetrics >= 0.7.0
+- numpy >= 1.20.0
+- scikit-learn >= 1.0.0
+- matplotlib >= 3.4.0
+- Pillow >= 8.2.0
+
+### Interpretability and Visualization
+- captum >= 0.4.0 (optional)
+- umap-learn >= 0.5.0 (optional)
+- seaborn >= 0.11.0
+
+### Experiment Tracking
+- wandb >= 0.12.0
+- pyyaml >= 6.0
+
+### System Monitoring
+- psutil >= 5.8.0
+- GPUtil >= 1.4.0
+
+## Weights & Biases Integration
+
+The project features comprehensive integration with Weights & Biases for experiment tracking, including:
+
+- Hyperparameter tracking
+- Model architecture logging
+- Performance metrics visualization
+- Reconstruction quality monitoring
+- Latent space analysis and clustering
+- Attention map visualization
+- GradCAM and attribution visualizations
+- System resource monitoring
+
+To view your experiments, visit [wandb.ai](https://wandb.ai) and navigate to your project.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Citation
+
+If you use this code in your research, please cite:
+
+```
+@article{yourlastname2025histopathology,
+  title={Interpretable Deep Representation Learning for Histopathology Analysis},
+  author={Your Name and Co-authors},
+  journal={Journal Name},
+  year={2025}
+}
+```
+
 # Project Title
 
 ## 1. Project Overview

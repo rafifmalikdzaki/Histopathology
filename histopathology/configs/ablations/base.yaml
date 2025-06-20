@@ -5,25 +5,98 @@ defaults:
 # Ablation identifier (used for tracking and logging)
 ablation:
   id: "base"
-  description: "Base configuration with all components enabled"
+  description: "Base configuration with all components enabled - using real PNG histopathology data"
+
+# Dataset configuration - real data
+data:
+  dataset: "HeparUnifiedPNG"
+  path: "histopathology/data/processed/HeparUnifiedPNG"  # Path to real PNG histopathology data
+  input_size: 128  # Input image size
+  crop_size: 128   # Center crop size
+  val_split: 0.2   # Validation split ratio
+  augmentations:
+    enable: true
+    color_jitter: 
+      brightness: 0.1
+      contrast: 0.1 
+      saturation: 0.05
+      hue: 0.02
+    random_rotate: 10  # Degrees
+    random_flip: true
+    random_crop: false  # Disable for histopathology tissue
+    normalize: true     # Normalize with ImageNet stats
 
 # Model configuration
 model:
   use_kan: true
   use_bam: true  
   use_eca: true
+  optimize_memory: true
+  # DAE architecture settings
+  architecture:
+    in_channels: 3
+    latent_dim: 384
+    base_filters: 64
+    dropout: 0.1
+  # KAN options with memory optimizations  
   kan_options:
-    kernel_size: [5, 5]
-    padding: [2, 2]
+    kernel_size: [3, 3]  # Reduced from [5, 5] for memory
+    padding: [1, 1]      # Reduced from [2, 2] for memory
+    memory_efficient: true
   reconstruction_options:
     kernel_size: [3, 3]
     padding: [1, 1]
 
-# Override these settings from experiments.yaml
-wandb:
-  tags: ['autoencoder', 'kan', 'attention', 'histopathology', 'ablation', 'base']
-  log_artifacts: false
+# Training configuration with memory optimizations
+training:
+  batch_size: 2  # Small batch size to prevent OOM errors
+  num_workers: 1  # Reduced worker count to save memory
+  precision: '16-mixed'  # Use mixed precision to reduce memory footprint
+  accumulate_grad_batches: 4  # Increase gradient accumulation to compensate for smaller batch
+  image_size: 128  # Standard size for histopathology tiles
+  max_epochs: 30  # Training for 30 epochs
+  log_every_n_steps: 10  # Log every 10 steps
+  use_synthetic_data: false  # Use real data
+  deterministic: true  # For reproducibility
 
+# Memory optimization settings
+memory:
+  optimize: true  
+  torch_compile: false  # Disable compilation to save memory
+  empty_cache: true  # Empty cache regularly
+  pin_memory: false  # Disable pin memory
+  gradient_checkpointing: true  # Enable gradient checkpointing to save memory
+  cache_clearing_interval: 5  # Clear cache periodically
+  force_gc: true  # Force garbage collection
+
+# Advanced optimizations
+advanced:
+  minimize_memory_usage: true
+  disable_validation_metrics: false  # Enable all metrics for full training
+  skip_reconstructions: false  # Enable reconstructions for full training
+
+# WandB configuration - enabled for real runs
+wandb:
+  project: "histopathology-dae-kan"
+  entity: null  # Your wandb username if needed
+  name: "histo-dae-kan-base-png"
+  tags: ['autoencoder', 'kan', 'attention', 'histopathology', 'ablation', 'base', 'real-data', 'png']
+  log_artifacts: true  # Save model artifacts
+  log_code: true       # Track code for reproducibility
+  mode: "online"       # Enable online syncing (change to "offline" for local only)
+
+# Callbacks configuration
 callbacks:
+  early_stopping:
+    monitor: "val_psnr"
+    patience: 5
+    mode: "max"
   model_checkpoint:
+    monitor: "val_psnr" 
     save_top_k: 1
+    mode: "max"
+    filename: "dae-kan-{epoch:02d}-{val_psnr:.2f}"
+  lr_monitor:
+    logging_interval: "step"
+
+# Note: Add PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to environment variables when running
