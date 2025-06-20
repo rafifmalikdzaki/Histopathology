@@ -1,6 +1,7 @@
 import numpy as np
 from tiatoolbox.tools import stainnorm
 from multiprocessing import Pool
+from .histopathology_dataset import ImageDataset
 
 import os
 import glob
@@ -48,6 +49,12 @@ def parallelPatching(path, patch_path, file_groups):
         with Pool() as pool:  # Create a multiprocessing pool
             pool.starmap(generate_patches, [(slide_path, path_patch_g)
                                             for slide_path in slide_paths])
+
+
+def create_dataset(split: str):
+    """Create train/test dataset"""
+    base_dir = './data/processed/HeparUnifiedPNG/'
+    return ImageDataset(image_dir=os.path.join(base_dir, split))
 
 
 if __name__ == "__main__":
