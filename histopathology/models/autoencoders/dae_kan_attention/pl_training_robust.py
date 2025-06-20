@@ -407,11 +407,33 @@ class RobustDAE(pl.LightningModule):
         
     def log_gradient_histograms(self):
         """Log histograms of model gradients"""
-        for name, param in self.model.named_parameters():
-            if param.requires_grad and param.grad is not None:
-                self.logger.experiment.log({
-                    f"grad_hist/{name}": wandb.Histogram(param.grad.detach().cpu().numpy())
-                }, commit=False)
+        # Skip if WandB is disabled
+        wandb_enabled = os.environ.get("WANDB_MODE", "").lower() != "disabled" and os.environ.get("WANDB_MODE", "").lower() != "dryrun"
+        if not wandb_enabled:
+            return
+            
+        try:
+            # First, collect all gradient histograms in a dictionary
+            grad_data = {}
+            for name, param in self.model.named_parameters():
+                if param.requires_grad and param.grad is not None:
+                    grad_data[f"grad_hist/{name}"] = wandb.Histogram(param.grad.detach().cpu().numpy())
+            
+            # Log all gradient histograms directly to WandB (not through Lightning)
+            if grad_data:
+                # Use explicit commit=True to ensure data is sent to WandB immediately
+                wandb.log(grad_data, step=self.global_step, commit=True)
+                
+                # Separately log scalar norm values via Lightning's logging system
+                norm_dict = {}
+                for name, param in self.model.named_parameters():
+                    if param.requires_grad and param.grad is not None:
+                        norm_dict[f"grad_norm/{name}"] = torch.norm(param.grad).item()
+                
+                # Log norm values through Lightning (only scalars)
+                self.log_dict(norm_dict, on_step=True, on_epoch=False)
+        except Exception as e:
+            print(f"Error in log_gradient_histograms: {e}")
 
     def on_train_start(self):
         """Log model architecture and sample batch images at start of training"""
@@ -425,7 +447,8 @@ class RobustDAE(pl.LightningModule):
         
         # Create model graph if a sample batch is available
         if hasattr(self, "sample_batch") and self.sample_batch is not None:
-            self.logger.watch(self.model, log="all")
+            # Disable gradient and parameter logging for performance
+            # self.logger.watch(self.model, log="all")
     
     def training_step(self, batch, batch_idx):
         # Store sample batch for visualization if needed
@@ -458,6 +481,7 @@ class RobustDAE(pl.LightningModule):
         
         # Basic metric logging
         metrics_dict = {
+            'epoch': self.current_epoch,
             'train_loss': loss,
             'train_mse_loss': mse_loss,
             'train_reg_loss': reg_loss,
@@ -469,7 +493,19 @@ class RobustDAE(pl.LightningModule):
         
         # Add histogram of latent space values periodically
         if batch_idx % 100 == 0:
-            metrics_dict['latent/histogram'] = wandb.Histogram(z.detach().cpu().flatten().numpy())
+            # Instead of logging WandB histogram directly, log histogram data to wandb
+            z_flat = z.detach().cpu().flatten()
+            
+            # Use wandb.log directly for histogram instead of through Lightning's self.log
+            if wandb.run is not None:
+                wandb.log({"latent/histogram": wandb.Histogram(z_flat.numpy())}, 
+                          step=self.global_step)
+            
+            # Also compute and log basic statistics that Lightning can handle
+            metrics_dict['latent/mean'] = z_flat.mean()
+            metrics_dict['latent/std'] = z_flat.std()
+            metrics_dict['latent/min'] = z_flat.min()
+            metrics_dict['latent/max'] = z_flat.max()
             
             # Log gradient histograms periodically (only on certain steps to reduce overhead)
             if self.global_step % 500 == 0:
@@ -494,6 +530,7 @@ class RobustDAE(pl.LightningModule):
 
         # Log metrics
         self.log_dict({
+            'epoch': self.current_epoch,
             'val_loss': mse_loss,
             'val_psnr': self.val_psnr,
             'val_ssim': self.val_ssim,

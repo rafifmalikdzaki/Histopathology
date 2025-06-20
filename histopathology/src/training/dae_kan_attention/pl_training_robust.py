@@ -414,11 +414,23 @@ class RobustDAE(pl.LightningModule):
             return
             
         try:
+            # Use wandb.log directly instead of through Lightning's logger
+            grad_data = {}
             for name, param in self.model.named_parameters():
                 if param.requires_grad and param.grad is not None:
-                    self.logger.experiment.log({
-                        f"grad_hist/{name}": wandb.Histogram(param.grad.detach().cpu().numpy())
-                    }, commit=False)
+                    grad_data[f"grad_hist/{name}"] = wandb.Histogram(param.grad.detach().cpu().numpy())
+            
+            # Log all gradient histograms at once
+            if grad_data:
+                wandb.log(grad_data, step=self.global_step, commit=False)
+                
+                # Also log norm values through Lightning (for scalars only)
+                norm_dict = {}
+                for name, param in self.model.named_parameters():
+                    if param.requires_grad and param.grad is not None:
+                        norm_dict[f"grad_norm/{name}"] = torch.norm(param.grad).item()
+                
+                self.log_dict(norm_dict, on_step=True, on_epoch=False)
         except Exception as e:
             print(f"Error in log_gradient_histograms: {e}")
 
@@ -445,11 +457,14 @@ class RobustDAE(pl.LightningModule):
             print(f"Error in on_train_start: {e}")
     
     def training_step(self, batch, batch_idx):
+        # Unpack image and label from batch tuple
+        x, _ = batch
+        
         # Store sample batch for visualization if needed
         if not hasattr(self, "sample_batch"):
-            self.sample_batch = batch.clone()
+            self.sample_batch = x.clone()
             
-        x = self.augment(batch)
+        x = self.augment(x)
         
         # Apply curriculum-based masking and noise
         masked_x = self.apply_masking(x)
@@ -490,8 +505,16 @@ class RobustDAE(pl.LightningModule):
         # Add WandB-specific logging only if enabled
         if wandb_enabled and batch_idx % 100 == 0:
             try:
-                # Add histogram of latent space values
-                metrics_dict['latent/histogram'] = wandb.Histogram(z.detach().cpu().flatten().numpy())
+                # Log histogram directly with wandb.log() instead of adding to metrics_dict
+                z_flat = z.detach().cpu().flatten().numpy()
+                wandb.log({"latent/histogram": wandb.Histogram(z_flat)}, 
+                          step=self.global_step)
+                
+                # Also compute and log basic statistics that Lightning can handle
+                metrics_dict['latent/mean'] = z_flat.mean()
+                metrics_dict['latent/std'] = z_flat.std()
+                metrics_dict['latent/min'] = z_flat.min()
+                metrics_dict['latent/max'] = z_flat.max()
                 
                 # Log gradient histograms periodically (only on certain steps to reduce overhead)
                 if self.global_step % 500 == 0:
@@ -505,7 +528,7 @@ class RobustDAE(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x = batch
+        x, _ = batch  # Unpack image and label from batch tuple
         encoded, decoded, z = self.model(x)
 
         mse_loss = nn.MSELoss()(decoded, x)

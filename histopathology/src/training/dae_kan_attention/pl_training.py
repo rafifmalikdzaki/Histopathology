@@ -44,6 +44,7 @@ class MyModel(pl.LightningModule):
         
         # Logging losses and metrics
         self.log_dict({
+            'epoch': self.current_epoch,
             'train_loss': loss,
             'train_mse_loss': mse_loss,
             'train_reg_loss': reg_loss,
@@ -71,6 +72,7 @@ class MyModel(pl.LightningModule):
         
         # Log metrics
         self.log_dict({
+            'epoch': self.current_epoch,
             'val_loss': loss,
             'val_mse_loss': mse_loss,
             'val_psnr': self.val_psnr,
@@ -122,7 +124,8 @@ if __name__ == '__main__':
     # Set up WandbLogger
     wandb_logger = WandbLogger(project='histo-dae')
 
-    wandb_logger.watch(model, log='all', log_freq=10)
+    # Optional: Disable gradient/parameter logging for performance
+    # wandb_logger.watch(model, log='all', log_freq=10)
 
     # Set up callbacks
     lr_monitor = LearningRateMonitor(logging_interval='epoch')

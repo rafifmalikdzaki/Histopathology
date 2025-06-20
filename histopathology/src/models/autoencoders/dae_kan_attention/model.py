@@ -259,7 +259,7 @@ class Autoencoder_Decoder(nn.Module):
             self.reconstruction = nn.Identity()
 
         # Enable debug mode for shape checking
-        self.debug = True
+        self.debug = False
 
     def forward(self, x: torch.Tensor, residualEnc1: torch.Tensor, residualEnc2: torch.Tensor) -> torch.Tensor:
         """

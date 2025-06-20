@@ -34,20 +34,8 @@ from rich.table import Table
 from rich.live import Live
 from rich.errors import LiveError
 from rich import box
-import logging
 import signal
 import atexit
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('tmux_launcher.log')
-    ]
-)
-logger = logging.getLogger("tmux_launcher")
 
 # ── constants ───────────────────────────────────────────────────────────────
 DEFAULT_BATCH = 2
@@ -80,20 +68,13 @@ def _tmux(*args: str | os.PathLike, check: bool = False) -> subprocess.Completed
     """Run a tmux command with better error handling."""
     cmd = ["tmux", *map(str, args)]
     try:
-        logger.debug(f"Running tmux command: {' '.join(cmd)}")
         result = subprocess.run(cmd, text=True, capture_output=True, check=check)
-        if result.returncode != 0:
-            logger.warning(f"Tmux command failed: {' '.join(cmd)}")
-            logger.warning(f"Error: {result.stderr.strip()}")
         return result
     except subprocess.CalledProcessError as e:
-        logger.error(f"Tmux command failed with exit code {e.returncode}: {' '.join(cmd)}")
-        logger.error(f"Error: {e.stderr.strip() if e.stderr else 'No error output'}")
         if check:
             raise
         return subprocess.CompletedProcess(cmd, e.returncode, "", str(e))
     except Exception as e:
-        logger.error(f"Error executing tmux command: {e}")
         if check:
             raise
         return subprocess.CompletedProcess(cmd, 1, "", str(e))
@@ -106,10 +87,8 @@ def _list_job_windows(session: str) -> List[str]:
             windows = [w.strip() for w in out.stdout.splitlines() if w.strip()]
             return windows
         else:
-            logger.warning(f"Failed to list windows for session {session}: {out.stderr.strip()}")
             return []
     except Exception as e:
-        logger.error(f"Error listing windows for session {session}: {e}")
         return []
 
 def _session_exists(session: str) -> bool:
@@ -120,11 +99,10 @@ def _session_exists(session: str) -> bool:
 def _cleanup_session(session: str) -> None:
     """Clean up a tmux session and all its windows."""
     if _session_exists(session):
-        logger.info(f"Cleaning up session: {session}")
         try:
             _tmux("kill-session", "-t", session)
-        except Exception as e:
-            logger.error(f"Error cleaning up session {session}: {e}")
+        except Exception:
+            pass
 
 # ── log helpers ─────────────────────────────────────────────────────────────
 def _extract_best_metrics(log: Path) -> Dict[str, str]:
@@ -187,7 +165,6 @@ def _check_data_path(config_path: Path) -> bool:
             dataset_path = REPO_ROOT / dataset_path
             
         if not dataset_path.exists():
-            logger.warning(f"Dataset path {dataset_path} does not exist!")
             return False
             
         # Check for specific dataset files/structure
@@ -195,24 +172,19 @@ def _check_data_path(config_path: Path) -> bool:
             # For HeparUnifiedPNG, check for tiles directory
             tiles_dir = dataset_path / "tiles"
             if not tiles_dir.exists():
-                logger.warning(f"HeparUnifiedPNG tiles directory not found at {tiles_dir}")
                 return False
                 
             # Count images to ensure we have data
             image_count = len(list(tiles_dir.glob("*.png")))
             if image_count < 10:  # Arbitrary threshold
-                logger.warning(f"Found only {image_count} images in {tiles_dir}. This seems too few.")
                 return False
                 
-            logger.info(f"Found valid HeparUnifiedPNG dataset with {image_count} images")
             return True
         else:
             # For other datasets, just check the directory exists
-            logger.info(f"Using dataset {dataset_name} at {dataset_path}")
             return True
             
-    except Exception as e:
-        logger.error(f"Error validating data path: {e}")
+    except Exception:
         return False
 
 # ── model utilities ─────────────────────────────────────────────────────────
@@ -239,8 +211,7 @@ def _param_size(config_path: Path) -> str:
             base_params -= 1.2  # BAM attention contributes around 1.2M parameters
             
         return f"{base_params:.1f}M"
-    except Exception as e:
-        logger.error(f"Error estimating model size: {e}")
+    except Exception:
         return "—"
 
 def _get_dataset_info(config_path: Path) -> str:
@@ -290,7 +261,6 @@ def _scheduler(ablations: List[str], params: List[str], configs: List[Path],
     original_sigterm = signal.getsignal(signal.SIGTERM)
     
     def signal_handler(sig, frame):
-        logger.info(f"Received signal {sig}, cleaning up...")
         _cleanup_session(session)
         # Restore original handlers and re-raise the signal
         signal.signal(signal.SIGINT, original_sigint)
@@ -315,14 +285,11 @@ def _scheduler(ablations: List[str], params: List[str], configs: List[Path],
         ablation_name = ablations[idx]
         logf = LOG_DIR / f"{ablation_name}.log"
         
-        logger.info(f"Launching job {idx+1}/{total}: {ablation_name}")
-        
         if logf.exists():
             try:
                 logf.unlink()
             except OSError:
                 backup_path = logf.with_suffix(f".old_{int(time.time())}")
-                logger.info(f"Could not remove log file, backing up to {backup_path}")
                 logf.rename(backup_path)
         
         # Set environment variables in a separate file to avoid shell parsing issues
@@ -348,20 +315,17 @@ def _scheduler(ablations: List[str], params: List[str], configs: List[Path],
         
         try:
             # Create the window with better error handling
-            logger.debug(f"Creating tmux window for {ablation_name}")
             result = _tmux("new-window", "-d", "-t", session, "-n", ablation_name, 
                          str(script_file))
             
             if result.returncode != 0:
-                logger.error(f"Failed to create tmux window for {ablation_name}: {result.stderr}")
                 status[idx] = ICON_ERR
                 return False
                 
             active_jobs.add(ablation_name)
             start_ts[idx] = time.time()
             return True
-        except Exception as e:
-            logger.error(f"Error launching job {ablation_name}: {e}")
+        except Exception:
             status[idx] = ICON_ERR
             return False
 
@@ -377,9 +341,7 @@ def _scheduler(ablations: List[str], params: List[str], configs: List[Path],
         try:
             live = Live(console=console, refresh_per_second=5)
             live.__enter__()
-            logger.info("Initialized live display")
-        except LiveError as e:
-            logger.warning(f"Could not initialize live display: {e}")
+        except LiveError:
             live = None
 
     try:
@@ -387,13 +349,10 @@ def _scheduler(ablations: List[str], params: List[str], configs: List[Path],
         consecutive_failures = 0
         max_consecutive_failures = 3
         
-        logger.info(f"Starting scheduler with {total} jobs, batch size {batch}")
-        
         while launched < total or running_windows():
             try:
                 # Get current running windows
                 running = set(running_windows())
-                logger.debug(f"Running windows: {running}")
                 
                 # Launch new jobs as needed
                 free = batch - len(running)
@@ -401,13 +360,10 @@ def _scheduler(ablations: List[str], params: List[str], configs: List[Path],
                     if launch(launched):
                         status[launched] = ICON_RUNNING
                         consecutive_failures = 0
-                        logger.info(f"Job {launched+1}/{total} ({ablations[launched]}) started")
                     else:
                         consecutive_failures += 1
-                        logger.warning(f"Failed to launch job {launched+1}/{total} ({ablations[launched]})")
                         
                         if consecutive_failures >= max_consecutive_failures:
-                            logger.error(f"Too many consecutive failures ({consecutive_failures}), aborting")
                             raise RuntimeError("Too many consecutive job launch failures")
                     
                     free -= 1
@@ -427,7 +383,6 @@ def _scheduler(ablations: List[str], params: List[str], configs: List[Path],
                         
                     # Check if a running job has completed
                     if status[i] == ICON_RUNNING and ablation_name not in running:
-                        logger.info(f"Job {ablation_name} has completed")
                         status[i] = ICON_ERR if _has_error(logf) else ICON_DONE
                         metrics[i] = _extract_best_metrics(logf)
                         times[i] = fmt(now - start_ts.get(i, now))
@@ -437,8 +392,8 @@ def _scheduler(ablations: List[str], params: List[str], configs: List[Path],
                         try:
                             _tmux("kill-window", "-t", f"{session}:{ablation_name}")
                             active_jobs.discard(ablation_name)
-                        except Exception as e:
-                            logger.warning(f"Error cleaning up window for {ablation_name}: {e}")
+                        except Exception:
+                            pass
 
                 # Build and display the status table
                 tbl = _make_table(ablations, params, exp_names, status, epochs, times, metrics)
@@ -460,37 +415,33 @@ def _scheduler(ablations: List[str], params: List[str], configs: List[Path],
                 time.sleep(REFRESH_RATE)
                 
             except KeyboardInterrupt:
-                logger.info("Keyboard interrupt received, cleaning up...")
                 raise
-            except Exception as e:
-                logger.error(f"Error in scheduler loop: {e}")
+            except Exception:
                 if len(running_windows()) == 0 and launched >= total:
-                    logger.info("All jobs appear to be done despite error, continuing...")
                     break
                 
                 # Sleep a bit longer after errors to avoid thrashing
                 time.sleep(REFRESH_RATE * 2)
                 
     except KeyboardInterrupt:
-        logger.info("Keyboard interrupt received, cleaning up...")
         # Cleanup is handled by the atexit handler
-    except Exception as e:
-        logger.error(f"Fatal error in scheduler: {e}")
+        pass
+    except Exception:
+        pass
     finally:
         # Clean up the live display
         if live:
             try:
                 live.__exit__(None, None, None)
-            except Exception as e:
-                logger.warning(f"Error cleaning up live display: {e}")
+            except Exception:
+                pass
                 
         # Clean up any remaining jobs
         for name in list(active_jobs):
             try:
-                logger.info(f"Cleaning up job {name}")
                 _tmux("kill-window", "-t", f"{session}:{name}")
-            except Exception as e:
-                logger.warning(f"Error cleaning up job {name}: {e}")
+            except Exception:
+                pass
 
     # Final summary
     if end_ts:
@@ -532,38 +483,28 @@ def _scheduler(ablations: List[str], params: List[str], configs: List[Path],
 def cli(base_config: Path, ablation_dir: Path, batch: int, smoke: bool, name: str,
         exclude: List[str], gpu: int, epochs: int, wandb_offline: bool, validate_data: bool):
     
-    logger.info(f"Starting ablation runner with: base_config={base_config}, batch={batch}, gpu={gpu}, epochs={epochs}, dataset=HeparUnifiedPNG")
-    
     # Check for tmux
     if not shutil.which("tmux"):
-        error_msg = "tmux not found. Please install tmux to use this script."
-        logger.error(error_msg)
-        console.print(f"[red]❌ {error_msg}")
+        console.print(f"[red]❌ tmux not found. Please install tmux to use this script.")
         sys.exit(1)
         
     # Validate the data path first
     if validate_data:
         console.print("[bold]Validating HeparUnifiedPNG dataset...[/]")
         if not DATA_DIR.exists():
-            error_msg = f"HeparUnifiedPNG dataset path not found: {DATA_DIR}"
-            logger.error(error_msg)
-            console.print(f"[red]❌ {error_msg}")
+            console.print(f"[red]❌ HeparUnifiedPNG dataset path not found: {DATA_DIR}")
             console.print("[yellow]Please ensure the HeparUnifiedPNG dataset is in histopathology/data/processed/HeparUnifiedPNG[/]")
             sys.exit(1)
             
         # Check for image files
         tiles_dir = DATA_DIR / "tiles"
         if not tiles_dir.exists():
-            error_msg = f"HeparUnifiedPNG tiles directory not found: {tiles_dir}"
-            logger.error(error_msg)
-            console.print(f"[red]❌ {error_msg}")
+            console.print(f"[red]❌ HeparUnifiedPNG tiles directory not found: {tiles_dir}")
             sys.exit(1)
             
         image_count = len(list(tiles_dir.glob("*.png")))
         if image_count < 10:
-            error_msg = f"Found only {image_count} images in HeparUnifiedPNG dataset. This seems too few."
-            logger.warning(error_msg)
-            console.print(f"[yellow]⚠ {error_msg}")
+            console.print(f"[yellow]⚠ Found only {image_count} images in HeparUnifiedPNG dataset. This seems too few.")
             continue_anyway = click.confirm("Continue anyway?", default=False)
             if not continue_anyway:
                 sys.exit(1)
@@ -574,34 +515,26 @@ def cli(base_config: Path, ablation_dir: Path, batch: int, smoke: bool, name: st
     try:
         ablation_files = glob.glob(f"{ablation_dir}/*.yaml")
         if not ablation_files:
-            error_msg = f"No ablation config files found in {ablation_dir}"
-            logger.error(error_msg)
-            console.print(f"[red]❌ {error_msg}")
+            console.print(f"[red]❌ No ablation config files found in {ablation_dir}")
             sys.exit(1)
     except Exception as e:
-        logger.error(f"Error finding ablation configs: {e}")
         console.print(f"[red]❌ Error finding ablation configs: {e}")
         sys.exit(1)
         
     # Set WandB mode based on flag
     global WANDB_MODE
     WANDB_MODE = "offline" if wandb_offline else "online"
-    logger.info(f"WandB mode: {WANDB_MODE}")
 
     smoke_flag = "--smoke" if smoke else ""
-    logger.info(f"Smoke test: {'enabled' if smoke else 'disabled'}")
 
     # Get ablation config names without extensions
     ablations = [Path(f).stem for f in ablation_files if Path(f).stem not in exclude]
     if not ablations:
-        error_msg = "No valid ablation configs after exclusions"
-        logger.error(error_msg)
-        console.print(f"[red]❌ {error_msg}")
+        console.print(f"[red]❌ No valid ablation configs after exclusions")
         sys.exit(1)
 
     # Full paths to config files
     configs = [Path(f) for f in ablation_files if Path(f).stem in ablations]
-    logger.info(f"Found {len(configs)} ablation configs: {', '.join(ablations)}")
     
     # Validate configs have proper data paths
     if validate_data:
@@ -613,9 +546,7 @@ def cli(base_config: Path, ablation_dir: Path, batch: int, smoke: bool, name: st
                 invalid_configs.append(ablations[i])
                 
         if invalid_configs:
-            error_msg = f"The following configs have invalid data paths: {', '.join(invalid_configs)}"
-            logger.warning(error_msg)
-            console.print(f"[yellow]⚠ {error_msg}")
+            console.print(f"[yellow]⚠ The following configs have invalid data paths: {', '.join(invalid_configs)}")
             continue_anyway = click.confirm("Continue anyway?", default=False)
             if not continue_anyway:
                 sys.exit(1)
@@ -626,8 +557,7 @@ def cli(base_config: Path, ablation_dir: Path, batch: int, smoke: bool, name: st
     for config in configs:
         try:
             params.append(_param_size(config))
-        except Exception as e:
-            logger.warning(f"Error estimating parameters for {config}: {e}")
+        except Exception:
             params.append("—")
             
     # Get dataset info for experiment naming
@@ -637,16 +567,13 @@ def cli(base_config: Path, ablation_dir: Path, batch: int, smoke: bool, name: st
     # Create unique session name
     session_id = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     session = f"{name}_{SESSION_BASE}_{session_id}"
-    logger.info(f"Creating tmux session: {session}")
     
     # Clean up any existing session with the same name
     if _session_exists(session):
-        logger.info(f"Session {session} already exists, killing it")
         _tmux("kill-session", "-t", session)
     
     # Create the session
     try:
-        logger.info("Creating new tmux session")
         result = _tmux("new-session", "-d", "-s", session, "-n", "dashboard", "watch -n1 nvidia-smi")
         if result.returncode != 0:
             raise RuntimeError(f"Failed to create tmux session: {result.stderr}")
@@ -654,10 +581,7 @@ def cli(base_config: Path, ablation_dir: Path, batch: int, smoke: bool, name: st
         # Configure session options
         _tmux("set-option", "-t", session, "-g", "remain-on-exit", "off")
         _tmux("set-option", "-t", session, "-g", "history-limit", "5000")
-        
-        logger.info(f"Session {session} created successfully")
     except Exception as e:
-        logger.error(f"Error creating tmux session: {e}")
         console.print(f"[red]❌ Error creating tmux session: {e}")
         sys.exit(1)
     
@@ -675,16 +599,11 @@ def cli(base_config: Path, ablation_dir: Path, batch: int, smoke: bool, name: st
         # Run the scheduler
         _scheduler(ablations, params, configs, batch, gpu, epochs, smoke_flag, exp_name_base, session)
         
-        # If we get here, everything completed successfully
-        logger.info("All jobs completed successfully")
-        
     except KeyboardInterrupt:
-        logger.info("Keyboard interrupt received")
         console.print("\n[red]Interrupted — tearing down tmux session...")
         _cleanup_session(session)
         sys.exit(130)
     except Exception as e:
-        logger.error(f"Error in scheduler: {e}")
         console.print(f"\n[red]Error in scheduler: {e}")
         _cleanup_session(session)
         sys.exit(1)
