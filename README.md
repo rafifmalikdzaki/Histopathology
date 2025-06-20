@@ -206,17 +206,34 @@ Histopathology/
 │   │   ├── datasets/            # Dataset implementations
 │   │   ├── preprocessing/       # Data preprocessing utilities
 │   │   └── utils/              # Data utility functions
-│   ├── models/                  # Reorganized model implementations
+│   ├── models/                  # 🔄 COMPLETELY REORGANIZED (June 2025)
 │   │   ├── autoencoders/       # Autoencoder architectures
-│   │   │   ├── dae_kan_attention/  # Main DAE+KAN+Attention model
-│   │   │   ├── deep_embedded_clustering/  # DEC implementations
-│   │   │   ├── vanilla_vae/     # Standard VAE
-│   │   │   └── variational/     # VaDE and other VAE variants
-│   │   ├── components/          # Reusable model components
-│   │   │   ├── attention_mechanisms/  # Attention modules (BAM, ECA, etc.)
-│   │   │   └── kan/            # KAN layer implementations
+│   │   │   ├── dae_kan_attention/      # Main DAE+KAN+Attention model
+│   │   │   │   ├── model.py           # Core architecture
+│   │   │   │   ├── KANConv.py         # KAN convolutional layers
+│   │   │   │   ├── KANLinear.py       # KAN linear layers
+│   │   │   │   ├── pl_training_pretrained.py # Training pipeline
+│   │   │   │   └── README.md          # Detailed documentation
+│   │   │   ├── deep_embedded_clustering/   # DEC implementations
+│   │   │   │   ├── ptdec/             # PyTorch DEC
+│   │   │   │   └── ptsdae/            # Stacked DAE components
+│   │   │   ├── vanilla_vae/           # Standard VAE
+│   │   │   └── variational/           # VaDE and VAE variants
+│   │   ├── components/          # 🆕 REUSABLE COMPONENTS
+│   │   │   ├── attention_mechanisms/  # Comprehensive attention library
+│   │   │   │   ├── bam.py             # Bottleneck Attention Module
+│   │   │   │   ├── cbam.py            # Convolutional Block Attention
+│   │   │   │   ├── eca.py             # Efficient Channel Attention
+│   │   │   │   ├── se_module.py       # Squeeze-and-Excitation
+│   │   │   │   ├── simam.py           # SimAM attention
+│   │   │   │   ├── coordatten.py      # Coordinate Attention
+│   │   │   │   └── triplet_attention.py # Triplet Attention
+│   │   │   └── kan/                   # KAN layer implementations
+│   │   │       ├── kan_layer.py       # Basic KAN functionality
+│   │   │       ├── KANConv.py         # Convolutional KAN
+│   │   │       └── KANLinear.py       # Linear KAN
 │   │   ├── experiments/         # Training and evaluation scripts
-│   │   └── utils/              # Model utilities
+│   │   └── utils/              # Model utilities (RBM, etc.)
 │   ├── training/               # Training orchestration
 │   │   ├── lightning/          # PyTorch Lightning modules
 │   │   ├── losses/             # Custom loss functions
@@ -233,17 +250,30 @@ Histopathology/
 └── .gitignore                # Git ignore rules
 ```
 
-### Key Changes in Models Organization
+### 🔄 Major Models Directory Reorganization (June 2025)
 
-The models directory has been **completely reorganized** for better maintainability:
+The models directory underwent a **complete structural overhaul** in the latest commit (15ef682):
 
-- **Flattened nested repositories**: Removed git submodules and nested repos
-- **Clear separation of concerns**: Models, components, and experiments in separate directories
-- **Reusable components**: Attention mechanisms and KAN layers in dedicated component directories
-- **Better imports**: Proper relative imports with __init__.py files
-- **Comprehensive documentation**: README files for each major component
+#### 🏗️ **Structural Improvements:**
+- ✅ **Flattened nested repositories**: Eliminated git submodules and conflicting dependencies
+- ✅ **Clear separation of concerns**: Logical grouping with dedicated directories for models, components, and experiments
+- ✅ **Reusable components**: Centralized attention mechanisms and KAN layers for easy reuse
+- ✅ **Proper Python packaging**: Complete __init__.py structure with correct relative imports
+- ✅ **Comprehensive documentation**: Detailed README files for each major component
 
-**Migration Note**: The old models structure has been moved to `models_old/` for reference.
+#### 🧹 **Technical Cleanup:**
+- ❌ **Removed**: 130,000+ lines of obsolete experiment artifacts and duplicate code
+- ❌ **Eliminated**: Nested git repositories causing import conflicts
+- ❌ **Cleaned**: TensorBoard logs, old checkpoints, and development notebooks from source tree
+- ✅ **Preserved**: All core functionality while improving maintainability
+
+#### 📚 **Enhanced Documentation:**
+- Comprehensive models/README.md with usage examples
+- Detailed DAE KAN Attention documentation
+- Clear installation and usage instructions
+- Component-level documentation for all attention mechanisms
+
+**Migration Note**: The old models structure has been archived to `models_old/` (excluded from git) for reference during the transition period.
 
 ## 5. Installation & Environment Setup
 
@@ -336,14 +366,15 @@ Recommended IDE settings for PyCharm/VS Code:
 
 ## 5. Usage Examples
 
-### Basic Model Training
+### Basic Model Training (Updated Imports)
 
 ```python
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
-from histopathology.models.AttentionBottleNeckedDAE.models.pl_training_pretrained import MyModel
-from histopathology.models.AttentionBottleNeckedDAE.models.pl_training_pretrained import ImageDataset
+# 🔄 Updated imports after reorganization
+from histopathology.models.autoencoders.dae_kan_attention.pl_training_pretrained import MyModel
+from histopathology.models.autoencoders.dae_kan_attention.histopathology_dataset import ImageDataset
 
 # Setup data
 image_dir = './histopathology/data/processed/HeparUnifiedPNG/'
@@ -367,10 +398,11 @@ trainer = pl.Trainer(
 trainer.fit(model, train_dataloaders=dataloader)
 ```
 
-### Feature Extraction
+### Feature Extraction (Updated Imports)
 
 ```python
-from histopathology.models.AttentionBottleNeckedDAE.models.model import DAE_KAN_Attention
+# 🔄 Updated import path after reorganization
+from histopathology.models.autoencoders.dae_kan_attention.model import DAE_KAN_Attention
 
 # Load trained model
 model = DAE_KAN_Attention(device='cuda')
@@ -381,6 +413,34 @@ model.eval()
 with torch.no_grad():
     encoded, decoded, z = model(input_batch)
     features = z.cpu().numpy()  # Bottleneck features for downstream tasks
+```
+
+### Using Individual Components (New in Reorganization)
+
+```python
+# 🆕 Access individual attention mechanisms
+from histopathology.models.components.attention_mechanisms.bam import BAM
+from histopathology.models.components.attention_mechanisms.eca import ECABlock
+from histopathology.models.components.kan.KANConv import KANConv2d
+
+# Initialize attention modules
+bam_attention = BAM(channels=256)
+eca_attention = ECABlock(channels=256)
+kan_conv = KANConv2d(in_channels=3, out_channels=64, kernel_size=3)
+
+# Use in custom architectures
+class CustomModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.kan_conv = KANConv2d(3, 64, 3)
+        self.bam = BAM(64)
+        self.eca = ECABlock(64)
+    
+    def forward(self, x):
+        x = self.kan_conv(x)
+        x = self.bam(x)
+        x = self.eca(x)
+        return x
 ```
 
 ### Clustering Analysis
@@ -444,7 +504,7 @@ def process_dataset(input_dir, output_dir, model):
     return df
 ```
 
-## 6. Repository Structure
+## 6. Detailed Repository Structure
 
 ```
 Histopathology/
@@ -453,27 +513,60 @@ Histopathology/
 │   │   ├── 📁 processed/               # Processed datasets
 │   │   │   └── 📁 HeparUnifiedPNG/     # Processed hepatic tissue images
 │   │   └── 📁 raw/                     # Raw WSI files
-│   ├── 📁 models/                       # Model implementations
-│   │   ├── 📁 AttentionBottleNeckedDAE/ # Main DAE-KAN-Attention model
-│   │   │   ├── 📁 models/              # Core model files
-│   │   │   │   ├── 🐍 model.py         # DAE_KAN_Attention architecture
+│   ├── 📁 models/                       # 🔄 REORGANIZED MODEL DIRECTORY
+│   │   ├── 📁 autoencoders/            # Autoencoder architectures
+│   │   │   ├── 📁 dae_kan_attention/   # 🎯 Main DAE+KAN+Attention model
+│   │   │   │   ├── 🐍 model.py         # Core DAE_KAN_Attention architecture
+│   │   │   │   ├── 🐍 model_rev2.py    # Enhanced model variant
+│   │   │   │   ├── 🐍 KANConv.py       # KAN convolutional layers
+│   │   │   │   ├── 🐍 KANLinear.py     # KAN linear layers
 │   │   │   │   ├── 🐍 pl_training_pretrained.py # PyTorch Lightning training
-│   │   │   │   └── 🐍 histopathology_dataset.py # Data loading utilities
-│   │   │   ├── 📁 attention_mechanisms/ # Attention components
+│   │   │   │   ├── 🐍 pl_training.py   # Alternative training script
+│   │   │   │   ├── 🐍 histopathology_dataset.py # Data loading utilities
+│   │   │   │   ├── 🐍 dae_embedding.py # Feature extraction utilities
+│   │   │   │   ├── 🐍 convolution.py   # Custom convolution operations
+│   │   │   │   └── 📄 README.md        # Detailed model documentation
+│   │   │   ├── 📁 deep_embedded_clustering/ # DEC implementations
+│   │   │   │   ├── 📁 ptdec/           # PyTorch DEC implementation
+│   │   │   │   │   ├── 🐍 cluster.py   # Clustering utilities
+│   │   │   │   │   ├── 🐍 dec.py       # DEC model
+│   │   │   │   │   ├── 🐍 model.py     # Base model classes
+│   │   │   │   │   └── 🐍 utils.py     # Utility functions
+│   │   │   │   └── 📁 ptsdae/          # Stacked Denoising Autoencoder
+│   │   │   │       ├── 🐍 dae.py       # Denoising autoencoder
+│   │   │   │       ├── 🐍 sdae.py      # Stacked DAE
+│   │   │   │       ├── 🐍 model.py     # Model definitions
+│   │   │   │       └── 🐍 utils.py     # Helper functions
+│   │   │   ├── 📁 vanilla_vae/         # Standard VAE implementation
+│   │   │   └── 📁 variational/         # VaDE and VAE variants
+│   │   │       ├── 🐍 VaDE.py          # Variational Deep Embedding
+│   │   │       └── 🐍 training.py      # Training scripts
+│   │   ├── 📁 components/              # 🆕 REUSABLE COMPONENTS
+│   │   │   ├── 📁 attention_mechanisms/ # Comprehensive attention library
 │   │   │   │   ├── 🐍 bam.py           # Bottleneck Attention Module
-│   │   │   │   └── 🐍 eca.py           # Efficient Channel Attention
-│   │   │   ├── 📁 kan/                 # KAN layer implementations
-│   │   │   │   ├── 🐍 KANLayer.py      # Core KAN functionality
-│   │   │   │   └── 🐍 KANConv.py       # KAN Convolutional layers
-│   │   │   └── 🐍 dae_embedding.py     # Feature extraction utilities
-│   │   ├── 📁 Autoencoders/            # Traditional autoencoder models
-│   │   │   └── 📁 DeepEmbeddedClustering/
-│   │   │       └── 📁 ptdec/           # DEC implementation
-│   │   └── 📁 VariationalAutoEncoder/   # VAE implementations
-│   │       └── 📁 mfcvae/              # Multi-Faceted Conditional VAE
+│   │   │   │   ├── 🐍 cbam.py          # Convolutional Block Attention
+│   │   │   │   ├── 🐍 eca.py           # Efficient Channel Attention
+│   │   │   │   ├── 🐍 se_module.py     # Squeeze-and-Excitation
+│   │   │   │   ├── 🐍 simam.py         # SimAM attention
+│   │   │   │   ├── 🐍 coordatten.py    # Coordinate Attention
+│   │   │   │   ├── 🐍 dual_attention.py # Dual Attention
+│   │   │   │   ├── 🐍 double_attention.py # Double Attention
+│   │   │   │   ├── 🐍 triplet_attention.py # Triplet Attention
+│   │   │   │   ├── 🐍 gc_module.py      # Global Context Module
+│   │   │   │   ├── 🐍 gct.py           # Global Context Transformer
+│   │   │   │   ├── 🐍 lct.py           # Local Context Transformer
+│   │   │   │   ├── 🐍 sk_module.py     # Selective Kernel
+│   │   │   │   └── 🐍 srm.py           # Style-based Recalibration
+│   │   │   └── 📁 kan/                 # KAN layer implementations
+│   │   │       ├── 🐍 kan_layer.py     # Basic KAN functionality
+│   │   │       ├── 🐍 KANConv.py       # Convolutional KAN layers
+│   │   │       └── 🐍 KANLinear.py     # Linear KAN layers
+│   │   ├── 📁 experiments/             # Training and evaluation scripts
+│   │   ├── 📁 utils/                   # Model utilities
+│   │   │   └── 🐍 rbm.py               # Restricted Boltzmann Machine
+│   │   └── 📄 README.md                # Comprehensive models documentation
 │   ├── 📁 notebooks/                   # Jupyter notebooks
 │   │   ├── 📓 Phase2/                  # Experimental notebooks
-│   │   │   └── 📓 ClusteringDAE.ipynb  # Clustering analysis
 │   │   └── 📓 exploratory/             # Data exploration
 │   ├── 📁 scripts/                     # Utility scripts
 │   │   ├── 🐍 data_preprocessing.py    # Data pipeline scripts
@@ -724,6 +817,7 @@ Commercial use is permitted under the MIT License, but please:
 
 ---
 
-**Last Updated**: June 2024  
-**Project Status**: Active Development  
-**Documentation Version**: 1.0.0
+**Last Updated**: June 20, 2025  
+**Project Status**: Active Development - Major Reorganization Completed  
+**Documentation Version**: 2.0.0  
+**Latest Major Update**: Models directory restructuring (Commit: 15ef682)
