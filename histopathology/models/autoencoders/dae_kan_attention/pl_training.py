@@ -3,7 +3,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
 import torchmetrics
-from model import DAE_KAN_Attention
+from histopathology.models.autoencoders.dae_kan_attention.model import DAE_KAN_Attention
 from histopathology_dataset import *
 from torch.utils.data import Dataset, DataLoader
 import wandb

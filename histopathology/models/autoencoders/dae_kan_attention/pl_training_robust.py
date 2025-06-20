@@ -4,7 +4,7 @@ from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.callbacks import EarlyStopping, LearningRateMonitor, ModelCheckpoint
 import torchmetrics
 from histopathology.models.autoencoders.dae_kan_attention.model import DAE_KAN_Attention
-from histopathology_dataset import *
+from histopathology.src.data.histopathology_dataset import *
 import wandb
 import torchvision.transforms as T
 from torchvision.utils import make_grid
