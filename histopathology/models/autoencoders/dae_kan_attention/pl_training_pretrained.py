@@ -20,21 +20,26 @@ class MyModel(pl.LightningModule):
         x = batch
         encoded, decoded, z = self.forward(x)
 
-        # MSE loss between input and reconstruction
+        # Calculate losses
         mse_loss = nn.MSELoss()(x, decoded)
-
-        # KAN regularization loss
         reg_loss = self.model.regularization_loss()
-        
-        # Total loss with regularization
-        loss = mse_loss + reg_loss * 0.5  # Scale regularization
+        loss = mse_loss + reg_loss * 0.5
 
-        # Logging losses
+        # Log metrics
         self.log_dict({
             'train_loss': loss,
             'train_mse_loss': mse_loss,
-            'train_reg_loss': reg_loss
-        }, on_epoch=True)
+            'train_reg_loss': reg_loss,
+            'learning_rate': self.trainer.optimizers[0].param_groups[0]['lr']
+        }, on_epoch=True, prog_bar=True)
+
+        # Log gradients
+        if batch_idx % 100 == 0:
+            for name, param in self.named_parameters():
+                if param.grad is not None:
+                    self.logger.experiment.log({
+                        f"gradients/{name}": wandb.Histogram(param.grad.cpu().numpy())
+                    })
 
         return loss
 
@@ -42,17 +47,42 @@ class MyModel(pl.LightningModule):
         x = batch
         encoded, decoded, z = self.forward(x)
 
-        # MSE loss between input and reconstruction
+        # Calculate losses
         mse_loss = nn.MSELoss()(x, decoded)
-
-        # Total loss
         loss = mse_loss
 
-        # Logging losses
-        self.log('val_loss', loss, on_epoch=True)
-        self.log('val_mse_loss', mse_loss, on_epoch=True)
+        # Calculate image metrics
+        psnr = 10 * torch.log10(1 / mse_loss)
+        ssim = torchmetrics.functional.structural_similarity_index_measure(decoded, x)
+
+        # Log metrics
+        self.log_dict({
+            'val_loss': loss,
+            'val_mse_loss': mse_loss,
+            'val_psnr': psnr,
+            'val_ssim': ssim
+        }, on_epoch=True, prog_bar=True)
+
+        # Log sample reconstructions
+        if batch_idx == 0:
+            self._log_reconstructions(x, decoded)
 
         return loss
+
+    def _log_reconstructions(self, original, reconstructed):
+        # Log first 4 samples from batch
+        images = []
+        for i in range(min(4, original.shape[0])):
+            img_pair = torch.cat([
+                original[i].cpu(), 
+                reconstructed[i].cpu()
+            ], dim=-1)
+            images.append(wandb.Image(img_pair, caption=f"Sample {i}"))
+        
+        self.logger.experiment.log({
+            "Reconstructions": images,
+            "epoch": self.current_epoch
+        })
 
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.parameters(), lr=2e-4, weight_decay=1e-4)
@@ -109,20 +139,44 @@ dataloader = DataLoader(dataset, batch_size=12, shuffle=True)
 
 model = MyModel()
 
-# Set up WandbLogger
-wandb_logger = WandbLogger(project='histo-dae')
+# Set up WandbLogger with config
+wandb_logger = WandbLogger(
+    project='histo-dae',
+    log_model='all',
+    save_dir='./wandb',
+    config={
+        "batch_size": 12,
+        "learning_rate": 2e-4,
+        "weight_decay": 1e-4,
+        "optimizer": "AdamW",
+        "scheduler": "CosineAnnealingLR"
+    }
+)
 
-wandb_logger.watch(model, log='all', log_freq=10)
+# Log model architecture and gradients
+wandb_logger.watch(
+    model, 
+    log='all',
+    log_freq=100,
+    log_graph=True
+)
 
 # Set up callbacks
 lr_monitor = LearningRateMonitor(logging_interval='epoch')
 checkpoint_callback = ModelCheckpoint(monitor='train_loss')
 
-# Initialize the trainer
+# Initialize trainer with more callbacks
 trainer = pl.Trainer(
     max_epochs=5,
     logger=wandb_logger,
-    callbacks=[lr_monitor, checkpoint_callback]
+    callbacks=[
+        lr_monitor,
+        checkpoint_callback,
+        pl.callbacks.ProgressBar(refresh_rate=50)
+    ],
+    log_every_n_steps=50,
+    accelerator='auto',
+    devices='auto'
 )
 
 # # Train the model
