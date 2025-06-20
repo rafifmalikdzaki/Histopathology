@@ -1,0 +1,14 @@
+# Base configuration for ablation studies
+defaults:
+  - _self_
+
+model:
+  use_kan: True
+  use_bam: True  
+  use_eca: True
+  kan_options:
+    kernel_size: [5, 5]
+    padding: [2, 2]
+  reconstruction_options:
+    kernel_size: [3, 3]
+    padding: [1, 1]

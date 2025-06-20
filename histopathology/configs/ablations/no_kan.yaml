@@ -1,0 +1,7 @@
+# Ablation config without KAN layers
+defaults:
+  - base
+  - _self_
+
+model:
+  use_kan: False

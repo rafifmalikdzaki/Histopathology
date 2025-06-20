@@ -8,16 +8,21 @@ from .KANConv import KAN_Convolutional_Layer as KANCL
 
 class Autoencoder_Encoder(nn.Module):
 
-    def __init__(self, device: str = 'cpu'):
+    def __init__(self, device: str = 'cpu', config=None):
         super(Autoencoder_Encoder, self).__init__()
         #Encoders
         
-        self.kan = KANCL(
-                    n_convs = 1,
-                    kernel_size = (5, 5),
-                    padding = (2, 2),
-                    device=device
-                )
+        self.config = config or {"use_kan": True, "kan_options": {}}
+        
+        if self.config.get("use_kan", True):
+            self.kan = KANCL(
+                n_convs=1,
+                kernel_size=tuple(self.config["kan_options"].get("kernel_size", [5,5])),
+                padding=tuple(self.config["kan_options"].get("padding", [2,2])),
+                device=device
+            )
+        else:
+            self.kan = nn.Identity()
 
         self.encoder1 = nn.Sequential(
             nn.Conv2d(3, 384, kernel_size=3, padding=1, stride=2),
@@ -38,7 +43,7 @@ class Autoencoder_Encoder(nn.Module):
             nn.ELU(inplace=True)
         )
 
-        self.ECA_Net = ECALayer(64)
+        self.ECA_Net = ECALayer(64) if self.config.get("use_eca", True) else nn.Identity()
 
         self.decoder1 = nn.Sequential(
             nn.BatchNorm2d(64),
@@ -150,7 +155,8 @@ class Autoencoder_Decoder(nn.Module):
 
 class Autoencoder_BottleNeck(nn.Module):
 
-    def __init__(self): 
+    def __init__(self, config=None): 
+        self.config = config or {"use_bam": True}
         super(Autoencoder_BottleNeck, self).__init__()
 
         self.encoder1 = nn.Sequential(
@@ -159,7 +165,7 @@ class Autoencoder_BottleNeck(nn.Module):
             nn.ELU(inplace=True),
         )
 
-        self.attn1 = BAM(384)
+        self.attn1 = BAM(384) if self.config.get("use_bam", True) else nn.Identity()
 
         self.encoder2 = nn.Sequential(
             nn.Conv2d(384, 16, kernel_size=3, padding=1, stride=2),
@@ -167,7 +173,7 @@ class Autoencoder_BottleNeck(nn.Module):
             nn.ELU(inplace=True),
         )
 
-        self.attn2 = BAM(16)
+        self.attn2 = BAM(16) if self.config.get("use_bam", True) else nn.Identity()
 
         # The VAE Code
 
@@ -187,11 +193,12 @@ class Autoencoder_BottleNeck(nn.Module):
         return x, z
 
 class DAE_KAN_Attention(nn.Module):
-    def __init__(self, device: str = 'cuda'):
+    def __init__(self, device: str = 'cuda', config=None):
         super().__init__()
-        self.ae_encoder = Autoencoder_Encoder(device=device)
-        self.bottleneck = Autoencoder_BottleNeck()
-        self.ae_decoder = Autoencoder_Decoder(device=device)
+        self.config = config or {}
+        self.ae_encoder = Autoencoder_Encoder(device=device, config=self.config)
+        self.bottleneck = Autoencoder_BottleNeck(config=self.config)
+        self.ae_decoder = Autoencoder_Decoder(device=device, config=self.config)
 
     def forward(self, x):
 

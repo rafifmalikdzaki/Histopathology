@@ -1,0 +1,7 @@
+# Ablation config without BAM attention
+defaults:
+  - base
+  - _self_
+
+model:
+  use_bam: False
